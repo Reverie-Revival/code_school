@@ -38,15 +38,15 @@
       </div>
     </form>
 
-    <div id="pin-prompt" class="pin-prompt" hidden>
+    <form id="pin-prompt" class="pin-prompt" hidden>
       <p>Enter PIN for <strong id="pin-prompt-name"></strong></p>
       <input id="pin-input" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" />
       <div class="profile-form-actions">
-        <button id="pin-submit-btn" type="button">Go</button>
+        <button id="pin-submit-btn" type="submit">Go</button>
         <button id="pin-cancel-btn" type="button">Back</button>
       </div>
       <p id="pin-error" class="pin-error" hidden>Wrong PIN — try again.</p>
-    </div>
+    </form>
   </div>
 
   <main class="lesson-grid" hidden>
@@ -55,6 +55,7 @@
         <span id="lesson-step-label">Lesson</span>
         <div class="lesson-nav">
           <button id="prev-lesson-btn" type="button">&larr; Prev</button>
+          <select id="lesson-select" aria-label="Jump to lesson"></select>
           <button id="next-lesson-btn" type="button">Next &rarr;</button>
         </div>
       </div>
@@ -62,7 +63,6 @@
       <div id="practice-box" class="practice-box" hidden>
         <h2>Practice</h2>
         <p id="practice-instructions"></p>
-        <button id="check-btn" type="button">Check My Work</button>
       </div>
     </section>
 

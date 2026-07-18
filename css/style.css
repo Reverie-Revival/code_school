@@ -273,12 +273,17 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
 
+#lesson-step-label {
+  white-space: nowrap;
+}
+
 #run-btn,
-#check-btn,
 .lesson-nav button {
   background: var(--accent);
   color: var(--accent-text);
@@ -298,14 +303,21 @@ body {
   margin-left: 0.4rem;
 }
 
+.lesson-nav select {
+  margin-left: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  max-width: 160px;
+}
+
 #run-btn:hover,
-#check-btn:hover,
 .lesson-nav button:hover {
   opacity: 0.9;
 }
 
 #run-btn:disabled,
-#check-btn:disabled,
 .lesson-nav button:disabled {
   opacity: 0.4;
   cursor: default;

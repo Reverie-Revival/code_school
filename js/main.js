@@ -14,7 +14,6 @@ const cancelNewProfileBtn = document.getElementById("cancel-new-profile-btn");
 const pinPrompt = document.getElementById("pin-prompt");
 const pinPromptName = document.getElementById("pin-prompt-name");
 const pinInput = document.getElementById("pin-input");
-const pinSubmitBtn = document.getElementById("pin-submit-btn");
 const pinCancelBtn = document.getElementById("pin-cancel-btn");
 const pinError = document.getElementById("pin-error");
 
@@ -128,7 +127,8 @@ newProfileForm.addEventListener("submit", async (e) => {
   }
 });
 
-pinSubmitBtn.addEventListener("click", () => {
+pinPrompt.addEventListener("submit", (e) => {
+  e.preventDefault();
   if (pinInput.value === pendingProfile.pin) {
     const profile = pendingProfile;
     pendingProfile = null;

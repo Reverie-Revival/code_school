@@ -28,8 +28,8 @@ export const chapter = {
         <p><code>print()</code> can display any text you put between the quotes. That text is
         called a <strong>string</strong> — you'll hear that word a lot.</p>
         <p>Change the code so it prints <code>Hello, Python!</code> exactly (capital letters and
-        punctuation matter to Python!). Then press <strong>Run</strong>, and use the
-        <strong>Check My Work</strong> button to see if you got it.</p>
+        punctuation matter to Python!). Then press <strong>Run</strong> — it'll tell you right away
+        whether you got it.</p>
       `,
       starterCode: `print("write your message here")`,
       practice: {

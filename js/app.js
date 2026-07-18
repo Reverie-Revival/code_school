@@ -11,9 +11,9 @@ const outputContent = document.getElementById("output-content");
 const errorsPane = document.getElementById("errors-pane");
 const errorsContent = document.getElementById("errors-content");
 const runBtn = document.getElementById("run-btn");
-const checkBtn = document.getElementById("check-btn");
 const prevBtn = document.getElementById("prev-lesson-btn");
 const nextBtn = document.getElementById("next-lesson-btn");
+const lessonSelect = document.getElementById("lesson-select");
 const lessonTitle = document.getElementById("lesson-title");
 
 let pyodide = null;
@@ -28,6 +28,7 @@ function renderLesson() {
 
   lessonTitle.textContent = `Chapter ${chapter.number}: ${chapter.title} — ${lesson.title}`;
   lessonStepLabel.textContent = `Lesson ${lesson.id}${completedLessons.has(lessonNumber) ? " ✓" : ""}`;
+  renderLessonSelect();
   lessonContent.innerHTML = lesson.content;
   codeInput.value = lesson.starterCode;
   outputContent.textContent = "";
@@ -49,6 +50,17 @@ function renderLesson() {
   nextBtn.disabled = currentIndex === chapter.lessons.length - 1;
 }
 
+function renderLessonSelect() {
+  lessonSelect.innerHTML = "";
+  chapter.lessons.forEach((lesson, i) => {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = `${lesson.id} — ${lesson.title}${completedLessons.has(i + 1) ? " ✓" : ""}`;
+    lessonSelect.appendChild(option);
+  });
+  lessonSelect.value = currentIndex;
+}
+
 async function runCurrentCode() {
   if (!pyodide) return;
 
@@ -56,6 +68,8 @@ async function runCurrentCode() {
   outputContent.textContent = "Running…";
   errorsContent.textContent = "";
   errorsPane.hidden = true;
+  practiceFeedback.hidden = true;
+  practiceFeedback.className = "practice-feedback";
 
   try {
     pyodide.globals.set("__user_code", codeInput.value);
@@ -80,6 +94,11 @@ _output = _buf.getvalue()
     if (error) {
       errorsContent.textContent = error;
       errorsPane.hidden = false;
+    } else {
+      // Every successful run doubles as a practice check when the lesson
+      // has one — not graded/punitive, just tells the kid whether this run
+      // matched what was expected. They can keep re-running freely.
+      await checkPractice();
     }
   } catch (err) {
     // Pyodide/JS-level failure (not a Python exception) — should be rare.
@@ -118,6 +137,7 @@ async function recordCompletion(lessonNumber) {
     completedLessons.add(lessonNumber);
     if (lessonNumber === currentIndex + 1) {
       lessonStepLabel.textContent = `Lesson ${chapter.lessons[currentIndex].id} ✓`;
+      renderLessonSelect();
     }
   } catch (err) {
     // Low-stakes: a failed progress save shouldn't interrupt the kid's flow.
@@ -126,7 +146,6 @@ async function recordCompletion(lessonNumber) {
 }
 
 runBtn.addEventListener("click", runCurrentCode);
-checkBtn.addEventListener("click", checkPractice);
 prevBtn.addEventListener("click", () => {
   if (currentIndex > 0) {
     currentIndex -= 1;
@@ -142,6 +161,10 @@ nextBtn.addEventListener("click", async () => {
   }
 
   currentIndex += 1;
+  renderLesson();
+});
+lessonSelect.addEventListener("change", () => {
+  currentIndex = Number(lessonSelect.value);
   renderLesson();
 });
 
