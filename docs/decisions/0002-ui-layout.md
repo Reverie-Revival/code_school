@@ -23,5 +23,9 @@ Separately, the app needs a widget for the middle pane where kids type Python, a
 - All state (current lesson, code in the textarea, last output) lives in plain JS variables/DOM — no framework reactivity to lean on. Fine at this scale (15 chapters, a few dozen lessons); would need revisiting if the app's interactivity grows significantly more complex.
 - Upgrading the editor or adopting a framework later are both isolated, additive changes — this decision doesn't lock those doors, it just declines them for v1.
 
-## Open consideration — fourth panel
-James is considering a fourth panel (bottom of screen) separate from the Output pane, for things like Python errors/tracebacks or other status messages, so a red traceback doesn't get visually mixed in with a program's normal stdout. Not decided yet. The v1 scaffold's CSS grid is built with this in mind (a `grid-template-areas` layout, not a hardcoded 3-way flexbox split), so adding a fourth region later is a layout-only change — no restructuring of the JS/DOM needed. Revisit and record the decision here once James decides whether/how to split errors from output.
+## Addendum (2026-07-17) — fourth panel: Errors, plain (not tabbed)
+Decided: add a fourth panel — **Errors**, spanning the full width beneath the three main panes — separate from Output. A test run surfaced the motivating case directly: a `NameError` was rendering inline inside the Output pane, visually indistinguishable from normal `print()` output.
+
+Considered making the bottom area a tabbed panel (Errors / Output / other future tabs) instead of a single dedicated Errors panel. Rejected for v1: with only one real second tenant (Output, which already has its own pane) and everything else purely speculative (a notes/scratch tab, a multi-check test-results tab, an on-demand hints tab), tabs add a click at exactly the moment a confused kid needs less friction, not more. A plain panel that's empty/hidden when there's no error, and appears with a red border the moment there is one, needs no explanation beyond "if that shows up, something went wrong."
+
+Implementation: the Errors panel is `hidden` (collapses out of the grid) whenever there's nothing to show, and reappears with the traceback text whenever a Python exception occurs. Revisit tabs only if a second genuine (non-speculative) tenant for that space shows up later.

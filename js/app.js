@@ -7,6 +7,8 @@ const practiceInstructions = document.getElementById("practice-instructions");
 const practiceFeedback = document.getElementById("practice-feedback");
 const codeInput = document.getElementById("code-input");
 const outputContent = document.getElementById("output-content");
+const errorsPane = document.getElementById("errors-pane");
+const errorsContent = document.getElementById("errors-content");
 const runBtn = document.getElementById("run-btn");
 const checkBtn = document.getElementById("check-btn");
 const prevBtn = document.getElementById("prev-lesson-btn");
@@ -25,6 +27,8 @@ function renderLesson() {
   lessonContent.innerHTML = lesson.content;
   codeInput.value = lesson.starterCode;
   outputContent.textContent = "";
+  errorsContent.textContent = "";
+  errorsPane.hidden = true;
   lastOutput = "";
 
   practiceFeedback.hidden = true;
@@ -46,6 +50,8 @@ async function runCurrentCode() {
 
   runBtn.disabled = true;
   outputContent.textContent = "Running…";
+  errorsContent.textContent = "";
+  errorsPane.hidden = true;
 
   try {
     pyodide.globals.set("__user_code", codeInput.value);
@@ -65,11 +71,18 @@ _output = _buf.getvalue()
     const error = pyodide.globals.get("_error");
 
     lastOutput = output;
-    outputContent.textContent = error ? `${output}\n${error}` : output || "(no output)";
+    outputContent.textContent = output || "(no output)";
+
+    if (error) {
+      errorsContent.textContent = error;
+      errorsPane.hidden = false;
+    }
   } catch (err) {
     // Pyodide/JS-level failure (not a Python exception) — should be rare.
     lastOutput = "";
-    outputContent.textContent = `Something went wrong running your code: ${err}`;
+    outputContent.textContent = "(no output)";
+    errorsContent.textContent = `Something went wrong running your code: ${err}`;
+    errorsPane.hidden = false;
   } finally {
     runBtn.disabled = false;
   }
