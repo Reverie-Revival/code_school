@@ -79,4 +79,4 @@ Free Supabase projects auto-pause after 7 days with no database activity. Not a 
 
 ## Naming note
 
-"Code School" was previously a real company (acquired by Pluralsight) and is close to the name of an active kids'-coding franchise, theCoderSchool. Not a concern for a private, personal-use repo. Worth revisiting if this ever becomes a public-facing product.
+"Code School" was previously a real company (acquired by Pluralsight) and is close to the name of an active kids'-coding franchise, theCoderSchool. The GitHub repo itself is public (required for free GitHub Pages hosting — see `memory/project_core.md`), but this remains a personal, non-commercial family project with no marketing, promotion, or business presence under this name. Worth revisiting if that ever changes.

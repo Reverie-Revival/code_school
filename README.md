@@ -15,9 +15,13 @@ Each chapter follows the same rhythm: **Lesson → Practice → Project → Pare
 
 15 chapters total, starting from `print()` and ending with a capstone project combining lists, loops, functions, and dictionaries. Progress is tracked separately per kid via lightweight profiles (no passwords) backed by Supabase.
 
+## Try it
+
+**https://reverie-revival.github.io/code_school/**
+
 ## Current phase
 
-Kickoff / pre-build. Course outline and architecture are defined in [CLAUDE.md](CLAUDE.md); implementation hasn't started yet.
+Chapter 1 ("Hello, Python") is fully working end-to-end and live: profile picker, Pyodide code execution, practice auto-checking, and progress saved per profile to Supabase. Chapters 2–15 aren't built yet — see [CLAUDE.md](CLAUDE.md) for the full course outline and [HANDOFF.md](HANDOFF.md) (local only, not committed) for exact next steps.
 
 ## Scope
 
@@ -25,4 +29,4 @@ Python only for v1. JavaScript may follow later using the same lesson engine. No
 
 ---
 
-Private, personal-use project. Not affiliated with the unrelated companies/franchises that have used similar names.
+Personal, non-commercial family project. The repo is public only because free GitHub Pages hosting requires it — not affiliated with the unrelated companies/franchises that have used similar names.
