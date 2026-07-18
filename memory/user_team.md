@@ -5,13 +5,15 @@ metadata:
   type: user
 ---
 
-James is building this solo, for his two sons to use on their iPads.
+James is building this solo, for his two sons (ages 9 and 12) to use on their iPads.
 
 - One primary learner is a total beginner with no prior coding experience; a second child will also use the app. Progress must stay separate per kid (name/avatar picker, no real auth).
+- **Boys are 9 and 12. Lesson tone: write to them like young adults, not little kids** — no baby talk, no over-the-top cutesy framing. They should feel respected by the material. At the same time, give them a lot of guidance and scaffolding at their actual skill level (total beginners) — "young adult tone" is about respect and voice, not about assuming prior knowledge or skipping steps.
 - Pace is intentionally slow and low-pressure — no calendar-based schedule, chapter length is the pacing mechanism.
-- Parent-gated projects mean James himself is part of the app's loop (reviewing/approving project checkpoints), not just the builder.
+- Lesson-to-lesson progression gates on passing that lesson's practice check (built 2026-07-18) — not a parent gate. What's still undecided is specifically how chapter-end **Projects** (ch. 4, 8, 11, 15) get verified; James explicitly does not want a parent-approval gate there either, but hasn't picked the replacement yet (see `memory/project_ideas.md`).
 - James personally prefers to work slow and talk decisions through before building — even outside the kid-facing pacing above, this is how *he* likes to collaborate on this project.
+- **Ambition for the curriculum**: James wants this to be as good as, or better than, a course he could have paid for — not a bare-minimum stand-in. When drafting curriculum/lessons, err toward thorough coverage of fundamentals rather than a sparse minimum viable set.
 
 **Why:** This shapes both the product (see [[project-core]]) and how James works on it — likely in short sessions around family time, not long uninterrupted blocks. The talk-it-through preference is about James's own working style, separate from the app's pacing design.
 
-**How to apply:** When suggesting build steps, favor ones James can ship incrementally and demo to his kids early (e.g. get Chapter 1 fully working before building out all 15 chapters' content). Don't assume a full-time dev cadence. Default to discussing an approach and getting buy-in before writing code, rather than moving straight to implementation — even for small decisions. When the work reaches a point where James would want to *see* it (e.g. try the app in a browser), start any local server and open the browser tab directly rather than handing James a command to run himself — he wants to look at the result, not operate the tooling.
+**How to apply:** When suggesting build steps, favor ones James can ship incrementally and demo to his kids early (e.g. get Chapter 1 fully working before building out all 15 chapters' content). Don't assume a full-time dev cadence. Default to discussing an approach and getting buy-in before writing code, rather than moving straight to implementation — even for small decisions. When the work reaches a point where James would want to *see* it (e.g. try the app in a browser), start any local server and open the browser tab directly rather than handing James a command to run himself — he wants to look at the result, not operate the tooling. When writing any lesson/practice/project content, write for a 9- and 12-year-old audience with a respectful, young-adult voice — and favor thorough coverage over a bare-minimum set, per James's stated ambition above.
