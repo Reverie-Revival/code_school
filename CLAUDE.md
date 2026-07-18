@@ -63,15 +63,15 @@ Reference material: include a simple, always-accessible cheat sheet / glossary (
 - **Hosting**: GitHub Pages (free), so the app works identically on the Mac and the iPad from day one — any device with a browser.
 - **Progress storage**: Supabase.
   - Org: James's existing personal `beja0502` org (same org that already hosts the separate, isolated `Forge Anchor` production project — this is org-level account grouping, not a shared database; kept separate from `Reverie Revival`, which lives under the business email on its own island).
-  - A dedicated Supabase **Project** named `family_hub` — the second of the org's two free-tier project slots (Forge Anchor uses the first) — using a dedicated schema: `python_learning`.
+  - A dedicated Supabase **Project** named `family_hub` — the second of the org's two free-tier project slots (Forge Anchor uses the first) — using a dedicated schema: `code_school` (named to match the GitHub repo; originally created as `python_learning`, renamed via [migration](supabase/migrations/20260718022409_rename_python_learning_to_code_school.sql)).
   - `family_hub` is also expected to eventually host a `meridian_almanac` schema for a separate personal project — both stay small enough to comfortably share one free-tier project.
-- **Profiles**: a simple picker on launch — each kid selects their name/avatar, no password/auth needed. Used only to separate progress records, not as real authentication.
-- **Row Level Security**: set up basic RLS on the `python_learning` schema so kid profiles can't read/write each other's progress rows, even though there's no real login system.
+- **Profiles**: a simple picker on launch — each kid selects their name/avatar. No real auth; an optional 4-digit PIN per profile (plain text, parent-recoverable) is purely a UX nicety to stop a sibling tapping the wrong name, not a security boundary.
+- **Row Level Security**: RLS is enabled on the `code_school` schema, but deliberately permissive (no per-profile enforcement) — this is a private, low-stakes family app, and James doesn't need his sons' profiles genuinely isolated from each other. See [docs/decisions/0003-profiles-rls.md](docs/decisions/0003-profiles-rls.md) for the full reasoning and what would change if that ever stopped being true.
 
-### Data model (rough shape, `python_learning` schema)
+### Data model (`code_school` schema — see [migrations](supabase/migrations/))
 
-- `profiles`: id, display_name, avatar/color
-- `progress`: profile_id, chapter_number, lesson_number, completed_at, (for chapter-project checkpoints) parent_approved_at
+- `profiles`: id, display_name, avatar_color, pin (plain text, optional), created_at
+- `progress`: profile_id, chapter_number, lesson_number, completed_at, parent_approved_at (for chapter-project checkpoints), created_at
 
 ### Known low-stakes gotcha
 
