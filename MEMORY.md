@@ -8,7 +8,8 @@
 - [project_core.md](memory/project_core.md) — stack (Pyodide/GitHub Pages/Supabase), scope, repo, current phase
 - [user_team.md](memory/user_team.md) — James solo-building for his two sons, pacing/incremental-shipping implications
 - [project_safety_rules.md](memory/project_safety_rules.md) — minors + progress data, no real auth, RLS required, age-appropriate copy
-- [project_workflow.md](memory/project_workflow.md) — session rhythm, GitHub Issues for tickets
+- [project_workflow.md](memory/project_workflow.md) — session rhythm; no GitHub Issues, uses project_ideas.md instead
+- [project_ideas.md](memory/project_ideas.md) — running backlog of ideas/improvements (replaces GitHub Issues for this project)
 - [feedback_organization.md](memory/feedback_organization.md) — keep docs lean, need-driven only
 - [project_close.md](memory/project_close.md) — close-of-session ritual
 - [feedback_proactive_docs.md](memory/feedback_proactive_docs.md) — when to flag doc needs

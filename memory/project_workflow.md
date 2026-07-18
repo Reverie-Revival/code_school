@@ -7,8 +7,8 @@ metadata:
 
 Standard Reverie Revival workflow applies: session starts by reading [HANDOFF.md](../HANDOFF.md) (git-ignored, never committed) and doing a repo hygiene check (`git status`, cross-check HANDOFF.md's claims against what's actually on disk); session ends per [[project-close]] when James signals ("let's end the session" or equivalent).
 
-**Ticketing:** GitHub Issues on `Reverie-Revival/code_school`, same as other Reverie Revival projects. No separate project-management tool needed for a solo family project.
+**Ticketing:** Not GitHub Issues, despite that being the default elsewhere. James explicitly chose a lighter-weight approach for this project: a single running backlog in [[project-ideas]], reordered/worked as he likes, items removed when done rather than closed. Correcting the original plan here (recorded 2026-07-18).
 
-**Why:** Keeps this project consistent with James's other repos so context-switching between projects doesn't require relearning process.
+**Why:** This is a solo/family project without the coordination needs that make Issues worth the overhead elsewhere in James's repos.
 
-**How to apply:** Don't introduce a different ticketing/PM tool without James asking. If a session produces multiple concrete follow-up tasks, offer to file them as GitHub Issues rather than just leaving them in HANDOFF.md's Next Up list.
+**How to apply:** When a session surfaces a new idea or improvement that isn't being done immediately, add it to `memory/project_ideas.md` rather than opening a GitHub Issue or just leaving it buried in conversation. When James wants to work on something, check that file first for existing context.
