@@ -14,6 +14,15 @@
   box-sizing: border-box;
 }
 
+/*
+ * The [hidden] attribute normally sets display:none via a low-specificity
+ * built-in rule, which any class selector setting its own `display` (e.g.
+ * `.profile-form { display: flex }`) silently overrides. Force it back.
+ */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -38,6 +47,167 @@ body {
   margin: 0.15rem 0 0;
   color: #555;
   font-size: 0.95rem;
+}
+
+.current-profile-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.app-header {
+  position: relative;
+}
+
+#switch-profile-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* Profile picker */
+
+.profile-picker {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.profile-picker h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.profile-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.profile-name {
+  font-weight: 600;
+}
+
+#add-profile-btn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.profile-form,
+.pin-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.profile-form label,
+.pin-prompt p {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.profile-form input,
+.pin-prompt input {
+  font-size: 1rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.color-swatches {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.color-swatch.selected {
+  border-color: var(--text);
+}
+
+.profile-form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.profile-form-actions button {
+  padding: 0.5rem 1.1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+#create-profile-btn,
+#pin-submit-btn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+}
+
+#cancel-new-profile-btn,
+#pin-cancel-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.pin-error {
+  color: var(--error);
+  font-size: 0.9rem;
+  margin: 0;
 }
 
 /*

@@ -113,7 +113,7 @@ nextBtn.addEventListener("click", () => {
   }
 });
 
-async function init() {
+export async function startApp() {
   renderLesson();
   outputContent.textContent = "Loading Python (first load only takes a few seconds)…";
   runBtn.disabled = true;
@@ -123,5 +123,3 @@ async function init() {
   outputContent.textContent = "Ready! Press Run to try the code.";
   runBtn.disabled = false;
 }
-
-init();
