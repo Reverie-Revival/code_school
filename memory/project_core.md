@@ -9,7 +9,7 @@ Code School is a free, browser-based Python learning app for James's two sons, b
 
 **Budget:** $0. Every tool/service choice must have a free tier that fully covers this project's scale (GitHub Pages, Pyodide, Supabase free tier). Flag anything that risks incurring cost before adopting it.
 
-**Stack:** Pyodide (client-side Python execution in-browser, WASM) + GitHub Pages hosting (free, works identically on Mac/iPad) + Supabase for progress storage. Supabase structure: James's existing personal `beja0502` org (same org as the separate, isolated `Forge Anchor` project — org-level grouping only, not a shared database), a dedicated **Project** named `family_projects` (the org's second free-tier project slot), with a `python_learning` schema and basic RLS so kid profiles can't read/write each other's rows. `family_projects` is expected to also host a `meridian_almanac` schema later.
+**Stack:** Pyodide (client-side Python execution in-browser, WASM) + GitHub Pages hosting (free, works identically on Mac/iPad) + Supabase for progress storage. Supabase structure: James's existing personal `beja0502` org (same org as the separate, isolated `Forge Anchor` project — org-level grouping only, not a shared database), a dedicated **Project** named `family_hub` (the org's second free-tier project slot), with a `python_learning` schema and basic RLS so kid profiles can't read/write each other's rows. `family_hub` is expected to also host a `meridian_almanac` schema later.
 
 **Repo:** private, `Reverie-Revival/code_school` on GitHub, cloned to `~/Documents/code_school`.
 
