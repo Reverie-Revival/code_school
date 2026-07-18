@@ -156,6 +156,11 @@ export async function startApp(profile) {
     completedLessons = new Set();
   }
 
+  // Resume at the first not-yet-completed lesson, rather than always
+  // restarting at 1.1 regardless of prior progress.
+  const resumeIndex = chapter.lessons.findIndex((_, i) => !completedLessons.has(i + 1));
+  currentIndex = resumeIndex === -1 ? chapter.lessons.length - 1 : resumeIndex;
+
   renderLesson();
   outputContent.textContent = "Loading Python (first load only takes a few seconds)…";
   runBtn.disabled = true;
