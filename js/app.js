@@ -91,25 +91,24 @@ function renderWelcome() {
 function renderLessonSelect() {
   lessonSelect.innerHTML = "";
 
-  const group = document.createElement("optgroup");
-  group.label = `Chapter ${chapter.number}: ${chapter.title}`;
-
-  const welcomeOption = document.createElement("option");
-  welcomeOption.value = WELCOME;
-  welcomeOption.textContent = "👋 Welcome";
-  group.appendChild(welcomeOption);
+  // The chapter's own name doubles as the selectable entry for its welcome
+  // page — no separate "Welcome" item. Lessons are visually nested under it
+  // with a leading indent (a plain <select> has no real hierarchy to lean on).
+  const chapterOption = document.createElement("option");
+  chapterOption.value = WELCOME;
+  chapterOption.textContent = `Chapter ${chapter.number}: ${chapter.title}`;
+  lessonSelect.appendChild(chapterOption);
 
   chapter.lessons.forEach((lesson, i) => {
     const option = document.createElement("option");
     option.value = String(i);
     const locked = isLessonLocked(i);
     const doneMark = completedLessons.has(i + 1) ? " ✓" : "";
-    option.textContent = `${lesson.id} — ${lesson.title}${doneMark}${locked ? " 🔒" : ""}`;
+    option.textContent = `    ${lesson.id} — ${lesson.title}${doneMark}${locked ? " 🔒" : ""}`;
     option.disabled = locked;
-    group.appendChild(option);
+    lessonSelect.appendChild(option);
   });
 
-  lessonSelect.appendChild(group);
   lessonSelect.value = currentIndex === WELCOME ? WELCOME : String(currentIndex);
 }
 
