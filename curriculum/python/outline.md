@@ -1,6 +1,6 @@
 # Code School — Curriculum Outline (Python)
 
-**Status: Finalized shape, pending one open call from James (see Chapter 15 note).** Table of contents — chapter, lesson, and project *titles/themes*, no lesson content written yet beyond what's already built (Ch. 1, Lessons 1.1–1.2). Revised 2026-07-18 after a full review pass with James.
+**Status: Finalized shape.** Table of contents — chapter, lesson, and project *titles/themes*, no lesson content written yet beyond what's already built (Ch. 1, Lessons 1.1–1.2). Revised 2026-07-18 after a full review pass with James.
 
 Audience: two boys, ages 9 and 12 — total beginners. Tone throughout: respectful, young-adult voice, heavy scaffolding at their actual skill level (see `memory/user_team.md`). Ambition: this should be as good as, or better than, a paid course — thorough coverage of fundamentals, not a bare-minimum set. Projects lean on real-world/game-like framing (James's "Bike" example feedback) to make them feel like something worth doing, not homework.
 
@@ -114,9 +114,10 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 *defining functions, parameters*
 
 12.1 Quick Recap: Chapters 9–11
-12.2 Writing Your Own Function: def
-12.3 Giving Functions Information: Parameters
-12.4 Chapter 12 Wrap-Up *(no Project — a stepping stone to ch. 13, where return values complete the picture)*
+12.2 Functions You Already Know *(you've been calling functions since ch. 1 — print() is one. Introduces a new one, `random.randint()`, as "someone else already wrote this function, you just call it" — sets up why writing your own, next, is useful.)*
+12.3 Writing Your Own Function: def
+12.4 Giving Functions Information: Parameters
+12.5 Chapter 12 Wrap-Up *(no Project — a stepping stone to ch. 13, where return values complete the picture)*
 
 ## Chapter 13 — Functions II
 *return values, why functions matter*
@@ -137,18 +138,7 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 
 15.1 Everything You've Learned (full-course recap)
 15.2 Planning Before You Code
-**→ Capstone Project: [open call — see note below]**
-
----
-
-## Open call needed: Chapter 15's capstone
-
-CLAUDE.md's original idea was a **text-based dice game**. Working through the full outline surfaced a real gap: **nothing in this curriculum teaches random number generation** (`import random` never comes up anywhere above) — so a dice game can't actually be built with only what's taught. Two honest options, not deciding this one without you:
-
-1. **Choose Your Own Adventure** instead of a dice game — a branching story using everything already taught (if/elif, input, functions, dictionaries for storing story state) with zero new concepts needed. Clean, no gap.
-2. Keep the **dice game**, and add one short new lesson (probably 15.1 or a new 15.2) introducing `random.randint()` right before the capstone — capstones conventionally get to introduce one small last tool. More true to the original CLAUDE.md idea, costs one extra lesson.
-
-Which direction do you want?
+**→ Capstone Project: Text-Based Dice Game or Simple Adventure** *(the gap that would've blocked this — no lesson taught random number generation — is resolved: `random.randint()` is introduced in ch. 12.2, so by ch. 15 it's already a familiar tool, not a last-minute surprise. Uses lists, loops, functions, dictionaries, decisions, input — everything from the whole course.)*
 
 ---
 
@@ -158,4 +148,5 @@ Which direction do you want?
 - **Ch. 4's Calculator and Ch. 13's "Level Up Your Calculator" are an intentional callback pair** — same project revisited with better tools, not two unrelated projects. This is the cascading structure CLAUDE.md asks for, made concrete.
 - **Chapters 13–14 stay shorter** than the 4–8 lesson range elsewhere — genuinely less new ground at that point. Not padded with filler.
 - **Recap lessons are still each their own numbered lesson** (5.1, 9.1, 12.1) — still open to change, hasn't come up again since the last round.
+- **`random.randint()` now taught in ch. 12.2**, before writing custom functions — resolves the gap that would've blocked ch. 15's dice-game capstone, and does it by tying into the functions theme rather than bolting it on as an unrelated aside.
 - Deeper real-world analogies (the "Bike" feedback) will show up most in the actual lesson *content* and in how each Project is framed/narrated — not really visible at the table-of-contents level. That's template/content work, next up.
