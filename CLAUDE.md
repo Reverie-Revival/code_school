@@ -18,35 +18,32 @@ A hands-on way for James and his sons to build something together as a family an
 
 - **Lesson**: a short explanation of one small idea (a few paragraphs max, one concept only).
 - **Practice**: a tiny code exercise right after the lesson (write 2–3 lines, run it, get instant automatic feedback on whether it worked). This is the repeated rep — happens after every lesson, not just at the end of a chapter.
-- **Project** (only at 4 checkpoint chapters, not every chapter): a bigger "put it together" exercise that deliberately pulls in concepts from the *current* chapter **and** all prior chapters — not just the newest material. This is what makes the course cascade instead of just being a list of disconnected topics.
+- **Project** (not every chapter — assigned per-chapter based on whether there's enough material yet for something genuinely interesting, not a fixed schedule; see [curriculum/python/outline.md](curriculum/python/outline.md) for the current assignment): a bigger "put it together" exercise that deliberately pulls in concepts from the *current* chapter **and** all prior chapters — not just the newest material. This is what makes the course cascade instead of just being a list of disconnected topics.
 - **Parent gate**: projects are NOT auto-graded. The kid shows the parent the finished project; the parent manually marks the chapter complete and unlocks the next one in the app. The app should make this a simple, obvious action for a parent to take (not hidden in a menu).
 
 Practice exercises ARE auto-checked (simple output/behavior matching) so the kid gets an immediate "yep, that worked!" without waiting on a parent. Projects are NOT auto-checked — deliberately, because grading a real project well is a hard problem not worth solving for v1, and parent review is actually the better mechanism here anyway.
 
 ## Chapter outline (15 chapters)
 
-Each chapter = 4–8 short lessons, each with a practice exercise. Projects appear only at chapters 4, 8, 11, and 15.
+High-level shape: 15 chapters covering Python fundamentals, from `print()` through dictionaries, ending in a capstone project. Each chapter = several short lessons, each with a practice exercise, plus a Wrap-Up; some chapters also get a full Project (see above).
+
+**The detailed, current lesson-by-lesson and Project-by-chapter breakdown lives in [curriculum/python/outline.md](curriculum/python/outline.md) — treat that as the source of truth for curriculum content, not the summary below**, which is kept only as a quick-glance chapter list:
 
 1. **Hello, Python** — print(), what even is code, running your first program
 2. **Variables** — storing values, naming things, string vs. number
-3. **Strings & Comments** — concatenation, f-strings, basic string methods (`.upper()`, `len()`), using `#` comments to leave notes; include a short "how to read an error message without panicking" lesson here
+3. **Strings & Comments** — concatenation, f-strings, basic string methods, `#` comments, reading an error message without panicking
 4. **Numbers & Math** — arithmetic operators, order of operations, `int` vs `float`
-   → **Project: Mad Libs** (uses variables, strings, string formatting, print — everything so far)
-5. **Getting Input** — `input()`, combining it with variables (brief recap of ch. 1–4 concepts at the start)
+5. **Getting Input** — `input()`, combining it with variables
 6. **Comparisons & Booleans** — `==`, `<`, `>`, `True`/`False`
 7. **Making Decisions I** — `if` / `else`
 8. **Making Decisions II** — `elif`, combining conditions with `and` / `or`
-   → **Project: Guess the Number** or simple quiz (uses decisions + input + variables + strings)
-9. **Lists** — creating, indexing, appending (brief recap of ch. 5–8 at the start)
+9. **Lists** — creating, indexing, appending
 10. **Looping I** — `for` loops, looping over lists
 11. **Looping II** — `while` loops, `break` / `continue`
-    → **Project: Times-table generator or pattern printer** (uses loops + lists + decisions + input)
-12. **Functions I** — defining functions, parameters (brief recap of ch. 9–11 at the start)
+12. **Functions I** — defining functions, parameters
 13. **Functions II** — return values, why functions matter
-    → mini-checkpoint: calculator built from functions for each operation (not necessarily a full parent-gated project — can fold into ch. 13's practice)
 14. **Dictionaries** — key/value basics
-15. **Putting It Together** — combining lists, loops, functions, dictionaries
-    → **Capstone Project: text-based dice game or simple adventure** (uses everything from the whole course)
+15. **Putting It Together** — combining lists, loops, functions, dictionaries, capstone project
 
 Reference material: include a simple, always-accessible cheat sheet / glossary (not a chapter — a sidebar or reference page) so the kid can look up "what's an f-string again?" without digging back through old chapters.
 
