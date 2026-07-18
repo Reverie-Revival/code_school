@@ -9,6 +9,8 @@ James's chosen process for this project (see [[project-workflow]]): no GitHub Is
 
 **How to apply:** When James wants to work on something, check here first for context before starting. When a new idea comes up mid-session, add it here rather than just fixing it inline (unless it's small enough to just do). When something is built, move it to **Built, awaiting James's QA** — do NOT remove it yet, even if it's been tested end-to-end in an automated browser test. Only remove an item once James has personally tried it himself and confirmed it's good. Automated verification proves it works; it doesn't substitute for James's own sign-off before something leaves the list.
 
+**Every time one or more items move into "Built, awaiting James's QA," give James an explicit checklist of what to click and what he should see** — not just "done, go check it out." One line per item: where to go, what to do, what the expected result is. Don't make him rediscover what needs testing by reading this file or guessing.
+
 ## Open ideas
 
 1. **Chapter-level navigation still needed.** Lesson-level dropdown with titles shipped 2026-07-18 (`#lesson-select` in `js/app.js`), but there's still no chapter list/switcher — the app only knows about Chapter 1 (hardcoded import in `js/app.js`). Same underlying gap as the "design multi-chapter navigation" item that'll come up once Chapter 2 exists — resolve both together.
