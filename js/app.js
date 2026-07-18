@@ -1,4 +1,4 @@
-import { chapter } from "../content/chapters/chapter1.js";
+import { chapter } from "../curriculum/python/chapters/chapter1.js";
 import { fetchProgress, markLessonComplete } from "./progress.js";
 
 const WELCOME = "welcome"; // currentIndex sentinel for the chapter welcome page

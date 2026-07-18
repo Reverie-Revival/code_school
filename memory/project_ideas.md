@@ -19,9 +19,7 @@ James's chosen process for this project (see [[project-workflow]]): no GitHub Is
 
 3. **Chapter-end Project verification still undecided.** James does NOT want a parent-gate blocking chapter-to-chapter progression (lesson-to-lesson locking is now built — see below). What's still open is specifically the checkpoint **Projects** (ch. 4, 8, 11, 15): James says "parent isn't the way" but hasn't decided the replacement mechanism yet — he wants to see what a real chapter project looks like first before deciding how it gets verified. **This will require updating CLAUDE.md's "Parent gate" core design principle**, once the replacement mechanism is decided. Don't build ahead of that decision.
 
-4. **Multi-curriculum extensibility.** Build this so a second curriculum (Python level 2, JavaScript, etc.) can be added later without a rework. Not new scope — matches CLAUDE.md's own "JavaScript may follow later using the same architecture" line — just worth deliberately keeping in mind as the content model (`content/chapters/`, `docs/curriculum/`) takes shape. Don't restructure preemptively though: no second curriculum exists yet, so a flat layout stays right until one actually gets built (added 2026-07-18, during the curriculum outline spike).
-
-5. **Badge system for profiles**, showing what a kid has completed. Explicitly future/low-priority — James flagged it just so it isn't lost, not because it's needed now (added 2026-07-18).
+4. **Badge system for profiles**, showing what a kid has completed. Explicitly future/low-priority — James flagged it just so it isn't lost, not because it's needed now (added 2026-07-18).
 
 ## Built, awaiting James's QA
 
