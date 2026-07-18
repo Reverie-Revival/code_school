@@ -66,7 +66,7 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 6.1 True or False: What's a Boolean?
 6.2 Are They Equal? == and !=
 6.3 Bigger or Smaller? < and >
-6.4 Chapter 6 Wrap-Up *(no Project — comparisons alone don't* do *anything yet; that's what ch. 7–8 unlock)*
+6.4 Wrap-Up: **Stat Battle** *(compare two characters' stats — strength, speed, whatever — and print True/False for each matchup. No Project yet: comparisons alone can only say True or False, not react to it — that's what ch. 7 unlocks. Sets up the scenario ch. 7's project pays off.)*
 
 ## Chapter 7 — Making Decisions I
 *if / else*
@@ -74,7 +74,8 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 7.1 Teaching Python to Make Choices: if
 7.2 The Other Path: else
 7.3 Decisions + Input, Together
-7.4 Chapter 7 Wrap-Up *(no Project — a stepping stone to ch. 8, where elif/and/or make decisions actually interesting)*
+7.4 Chapter 7 Wrap-Up
+**→ Project: Choose Your Own Adventure (Mini)** *(a simple branching story — one or two decision points, if/else based on what the player types. A small, single-fork taste of the idea; ch. 15's capstone is the full multi-branching version with dice/randomness. Can loosely continue ch. 6's Stat Battle scenario for a nice thread between the two, though it doesn't have to. Uses if/else + input + comparisons + variables + strings.)*
 
 ## Chapter 8 — Making Decisions II
 *elif, combining conditions with and / or*
@@ -145,7 +146,8 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 
 ## Notes on this revision
 
-- **Projects are no longer pinned to chapters 4/8/11/15.** Assigned per-chapter based on whether there's enough material yet to build something genuinely interesting: **Ch. 3 (Mad Libs), Ch. 4 (Math Magic Trick), Ch. 5 (Pig Latin Translator), Ch. 8 (Crack the Code), Ch. 11 (Pattern Art Machine), Ch. 13 (mini-checkpoint: Calculator), Ch. 15 (capstone)**. Chapters 1, 2, 6, 7, 9, 10, 12, 14 don't have enough new ground alone to support a real Project — each still gets a fun, small Wrap-Up instead (several are now themed rather than a plain recap quiz).
+- **Projects are no longer pinned to chapters 4/8/11/15.** Assigned per-chapter based on whether there's enough material yet to build something genuinely interesting: **Ch. 3 (Mad Libs), Ch. 4 (Math Magic Trick), Ch. 5 (Pig Latin Translator), Ch. 7 (Choose Your Own Adventure Mini), Ch. 8 (Crack the Code), Ch. 11 (Pattern Art Machine), Ch. 13 (mini-checkpoint: Calculator), Ch. 15 (capstone: Dice Game)**. Chapters 1, 2, 6, 9, 10, 12, 14 don't have enough new ground alone to support a real Project — each still gets a fun, small Wrap-Up instead (several are now themed rather than a plain recap quiz).
+- **Ch. 6 and Ch. 7 revisited (2026-07-18):** James flagged both as a missed opportunity. Ch. 6 (comparisons only, no `if`/`else` yet) genuinely can't branch a story — it can only print True/False — so it keeps a themed Wrap-Up (Stat Battle) rather than a forced Project. Ch. 7 (adds `if`/`else`) is exactly where a story can react to a choice, so it gets a real Project: a small single-fork Choose Your Own Adventure. Ch. 15's capstone stays the Dice Game (James's call) — the ch. 7 adventure is a deliberately smaller taste of the same idea, not a duplicate.
 - **Redundancy pass (2026-07-18):** James caught that an earlier draft had Ch. 4 build a calculator that Ch. 13 immediately rebuilt — same payoff twice, with the second time just being "in functions now." Ch. 4 got a genuinely different project (Math Magic Trick) instead of a rebuild-bait one; Ch. 13's calculator is now the *only* one in the curriculum, so its payoff is "look how much cleaner functions make this," not repetition. Went through the rest of the Projects looking for the same problem — no other overlaps found (Mad Libs vs. Pig Latin are both "combine words into something fun," but differ enough in mechanic — code-edit-and-run vs. live-interactive — and in what they produce — a silly story vs. a translator you can feed anything).
 - **String indexing added to ch. 3.5** (`word[0]`, etc.) specifically to unblock Pig Latin — same pattern as adding `random.randint()` to ch. 12 to unblock the capstone: fill a real gap where the skill naturally belongs, rather than bolting it onto the project's own chapter late.
 - **Ch. 10 gets a themed Wrap-Up now too** ("Top 5 List, Take Two" — reprint ch. 9's list with a loop) — a small callback, not a full Project.
