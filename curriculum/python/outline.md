@@ -34,9 +34,10 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 3.2 f-strings: The Easy Way to Mix Text and Variables
 3.3 String Superpowers: .upper() and .lower()
 3.4 Measuring a String: len()
-3.5 Leaving Notes with # Comments
-3.6 Reading an Error Message Without Panicking
-3.7 Chapter 3 Wrap-Up
+3.5 Grabbing Part of a String: Indexing *(word[0] for the first letter, etc. — sets up ch. 5's Pig Latin project)*
+3.6 Leaving Notes with # Comments
+3.7 Reading an Error Message Without Panicking
+3.8 Chapter 3 Wrap-Up
 **→ Project: Mad Libs** *(moved here from ch. 4 — this is fundamentally a strings/f-strings exercise, not a math one. Uses variables, strings, f-strings, print.)*
 
 ## Chapter 4 — Numbers & Math
@@ -47,7 +48,7 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 4.3 Whole Numbers vs. Decimals (int vs. float)
 4.4 Mixing Math and Strings (why you can't just add them — a first look at converting types)
 4.5 Chapter 4 Wrap-Up
-**→ Project: Build a Calculator** *(takes two numbers and an operator, does the math — uses arithmetic, variables, print, and a first real taste of "put it all together." Comes back leveled-up in ch. 13 once functions exist.)*
+**→ Project: The Math Magic Trick** *(pick any number, follow a sequence of steps — double it, add 6, divide by 2, subtract your original number — and the answer is* always *the same, no matter what you started with. A genuine "wait, how does that work?!" moment that's really just algebra. Replaces an earlier "build a calculator" idea — that felt flat as its own project once ch. 13 was going to build a calculator anyway; this is a distinct, more delightful use of the same toolkit — arithmetic, order of operations, variables, print.)*
 
 ## Chapter 5 — Getting Input
 *input(), combining it with variables*
@@ -57,7 +58,7 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 5.3 Saving What They Typed
 5.4 The input() Gotcha: It's Always Text
 5.5 Chapter 5 Wrap-Up
-**→ Project: Fortune Teller** *(ask the player a few questions with input(), mix their answers into a fun predicted "fortune" using f-strings — a natural first project that's actually interactive, not just typed-in-advance like Mad Libs.)*
+**→ Project: Pig Latin Translator** *(type in a word or sentence, get it back in Pig Latin — a game they already know from the playground, now as code. Uses the string indexing from ch. 3.5 to move the first letter to the end and add "ay," plus input() and f-strings. Simplified on purpose — the classic every-word-has-a-vowel-rule version needs if/else, which doesn't exist until ch. 7–8, so this version applies one simple rule to every word rather than branching.)*
 
 ## Chapter 6 — Comparisons & Booleans
 *==, <, >, True/False*
@@ -99,7 +100,7 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 10.1 Doing Something Over and Over: for Loops
 10.2 Looping Over a List
 10.3 Looping a Set Number of Times: range()
-10.4 Chapter 10 Wrap-Up *(no Project — a stepping stone to ch. 11, where break/continue round out looping)*
+10.4 Wrap-Up: **Top 5 List, Take Two** *(revisit ch. 9's Top 5 List, but print it with a loop instead of five separate lines — a small, satisfying callback showing the same result done better. No Project yet — a stepping stone to ch. 11, where break/continue round out looping.)*
 
 ## Chapter 11 — Looping II
 *while loops, break / continue*
@@ -124,7 +125,7 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 
 13.1 Getting an Answer Back: return
 13.2 Why Functions Matter (reuse, organizing code)
-13.3 Mini-Checkpoint: **Level Up Your Calculator** *(go back to the ch. 4 calculator and rebuild it using functions — one per operation. A deliberate callback to earlier work, not a brand-new project — folded into practice per CLAUDE.md, not a full checkpoint Project.)*
+13.3 Mini-Checkpoint: **Build a Calculator, the Smart Way** *(a calculator built from functions — one per operation — per CLAUDE.md's spec for this checkpoint. This is now the* only *calculator in the curriculum (ch. 4 no longer has one — see its note above), so the payoff here is "see how much cleaner this is once you know functions," not a rebuild of something they already did. Folded into practice, not a full checkpoint Project.)*
 
 ## Chapter 14 — Dictionaries
 *key/value basics*
@@ -144,9 +145,10 @@ Structure per CLAUDE.md: **Chapter → Lesson → Project.** Every chapter ends 
 
 ## Notes on this revision
 
-- **Projects are no longer pinned to chapters 4/8/11/15.** Assigned per-chapter based on whether there's enough material yet to build something genuinely interesting: **Ch. 3 (Mad Libs), Ch. 4 (Calculator), Ch. 5 (Fortune Teller), Ch. 8 (Crack the Code), Ch. 11 (Pattern Art Machine), Ch. 13 (mini-checkpoint callback), Ch. 15 (capstone)**. Chapters 1, 2, 6, 7, 9, 10, 12, 14 don't have enough new ground alone to support a real Project — each still gets a fun, small Wrap-Up instead (several are now themed rather than a plain recap quiz).
-- **Ch. 4's Calculator and Ch. 13's "Level Up Your Calculator" are an intentional callback pair** — same project revisited with better tools, not two unrelated projects. This is the cascading structure CLAUDE.md asks for, made concrete.
+- **Projects are no longer pinned to chapters 4/8/11/15.** Assigned per-chapter based on whether there's enough material yet to build something genuinely interesting: **Ch. 3 (Mad Libs), Ch. 4 (Math Magic Trick), Ch. 5 (Pig Latin Translator), Ch. 8 (Crack the Code), Ch. 11 (Pattern Art Machine), Ch. 13 (mini-checkpoint: Calculator), Ch. 15 (capstone)**. Chapters 1, 2, 6, 7, 9, 10, 12, 14 don't have enough new ground alone to support a real Project — each still gets a fun, small Wrap-Up instead (several are now themed rather than a plain recap quiz).
+- **Redundancy pass (2026-07-18):** James caught that an earlier draft had Ch. 4 build a calculator that Ch. 13 immediately rebuilt — same payoff twice, with the second time just being "in functions now." Ch. 4 got a genuinely different project (Math Magic Trick) instead of a rebuild-bait one; Ch. 13's calculator is now the *only* one in the curriculum, so its payoff is "look how much cleaner functions make this," not repetition. Went through the rest of the Projects looking for the same problem — no other overlaps found (Mad Libs vs. Pig Latin are both "combine words into something fun," but differ enough in mechanic — code-edit-and-run vs. live-interactive — and in what they produce — a silly story vs. a translator you can feed anything).
+- **String indexing added to ch. 3.5** (`word[0]`, etc.) specifically to unblock Pig Latin — same pattern as adding `random.randint()` to ch. 12 to unblock the capstone: fill a real gap where the skill naturally belongs, rather than bolting it onto the project's own chapter late.
+- **Ch. 10 gets a themed Wrap-Up now too** ("Top 5 List, Take Two" — reprint ch. 9's list with a loop) — a small callback, not a full Project.
 - **Chapters 13–14 stay shorter** than the 4–8 lesson range elsewhere — genuinely less new ground at that point. Not padded with filler.
 - **Recap lessons are still each their own numbered lesson** (5.1, 9.1, 12.1) — still open to change, hasn't come up again since the last round.
-- **`random.randint()` now taught in ch. 12.2**, before writing custom functions — resolves the gap that would've blocked ch. 15's dice-game capstone, and does it by tying into the functions theme rather than bolting it on as an unrelated aside.
 - Deeper real-world analogies (the "Bike" feedback) will show up most in the actual lesson *content* and in how each Project is framed/narrated — not really visible at the table-of-contents level. That's template/content work, next up.
