@@ -1,4 +1,5 @@
 import { chapter } from "../content/chapters/chapter1.js";
+import { fetchProgress, markLessonComplete } from "./progress.js";
 
 const lessonStepLabel = document.getElementById("lesson-step-label");
 const lessonContent = document.getElementById("lesson-content");
@@ -18,12 +19,15 @@ const lessonTitle = document.getElementById("lesson-title");
 let pyodide = null;
 let currentIndex = 0;
 let lastOutput = "";
+let currentProfile = null;
+let completedLessons = new Set(); // 1-based lesson numbers completed by currentProfile in this chapter
 
 function renderLesson() {
   const lesson = chapter.lessons[currentIndex];
+  const lessonNumber = currentIndex + 1;
 
   lessonTitle.textContent = `Chapter ${chapter.number}: ${chapter.title} — ${lesson.title}`;
-  lessonStepLabel.textContent = `Lesson ${lesson.id}`;
+  lessonStepLabel.textContent = `Lesson ${lesson.id}${completedLessons.has(lessonNumber) ? " ✓" : ""}`;
   lessonContent.innerHTML = lesson.content;
   codeInput.value = lesson.starterCode;
   outputContent.textContent = "";
@@ -88,7 +92,7 @@ _output = _buf.getvalue()
   }
 }
 
-function checkPractice() {
+async function checkPractice() {
   const lesson = chapter.lessons[currentIndex];
   if (!lesson.practice) return;
 
@@ -96,6 +100,29 @@ function checkPractice() {
   practiceFeedback.hidden = false;
   practiceFeedback.textContent = result.message;
   practiceFeedback.className = `practice-feedback ${result.pass ? "success" : "failure"}`;
+
+  if (result.pass) {
+    await recordCompletion(currentIndex + 1);
+  }
+}
+
+async function recordCompletion(lessonNumber) {
+  if (completedLessons.has(lessonNumber)) return;
+
+  try {
+    await markLessonComplete({
+      profileId: currentProfile.id,
+      chapterNumber: chapter.number,
+      lessonNumber,
+    });
+    completedLessons.add(lessonNumber);
+    if (lessonNumber === currentIndex + 1) {
+      lessonStepLabel.textContent = `Lesson ${chapter.lessons[currentIndex].id} ✓`;
+    }
+  } catch (err) {
+    // Low-stakes: a failed progress save shouldn't interrupt the kid's flow.
+    console.warn("Couldn't save progress:", err);
+  }
 }
 
 runBtn.addEventListener("click", runCurrentCode);
@@ -106,14 +133,29 @@ prevBtn.addEventListener("click", () => {
     renderLesson();
   }
 });
-nextBtn.addEventListener("click", () => {
-  if (currentIndex < chapter.lessons.length - 1) {
-    currentIndex += 1;
-    renderLesson();
+nextBtn.addEventListener("click", async () => {
+  if (currentIndex >= chapter.lessons.length - 1) return;
+
+  const lesson = chapter.lessons[currentIndex];
+  if (!lesson.practice) {
+    await recordCompletion(currentIndex + 1);
   }
+
+  currentIndex += 1;
+  renderLesson();
 });
 
-export async function startApp() {
+export async function startApp(profile) {
+  currentProfile = profile;
+
+  try {
+    const rows = await fetchProgress(currentProfile.id, chapter.number);
+    completedLessons = new Set(rows.map((row) => row.lesson_number));
+  } catch (err) {
+    console.warn("Couldn't load progress:", err);
+    completedLessons = new Set();
+  }
+
   renderLesson();
   outputContent.textContent = "Loading Python (first load only takes a few seconds)…";
   runBtn.disabled = true;

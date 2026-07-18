@@ -91,7 +91,7 @@ function enterApp(profile) {
   lessonGrid.hidden = false;
   currentProfileBadge.hidden = false;
   currentProfileName.textContent = profile.display_name;
-  startApp();
+  startApp(profile);
 }
 
 addProfileBtn.addEventListener("click", () => {
