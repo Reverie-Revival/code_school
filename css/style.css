@@ -63,6 +63,16 @@ body {
   position: relative;
 }
 
+.header-lesson-select {
+  display: block;
+  margin-top: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  max-width: 320px;
+}
+
 #switch-profile-btn {
   background: transparent;
   border: 1px solid var(--border);
@@ -303,14 +313,6 @@ body {
   margin-left: 0.4rem;
 }
 
-.lesson-nav select {
-  margin-left: 0.4rem;
-  padding: 0.3rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.85rem;
-  max-width: 160px;
-}
 
 #run-btn:hover,
 .lesson-nav button:hover {

@@ -5,6 +5,15 @@
 export const chapter = {
   number: 1,
   title: "Hello, Python",
+  welcome: {
+    content: `
+      <p>Welcome to <strong>Chapter 1: Hello, Python</strong>! By the end of this chapter you'll have
+      written and run your very first real Python programs.</p>
+      <p>Each lesson teaches one small idea, then gives you a bit of code to try yourself. There's no
+      clock here — take your time. When you're ready, press <strong>Next</strong> or pick a lesson from
+      the dropdown above to get started.</p>
+    `,
+  },
   lessons: [
     {
       id: "1.1",

@@ -1,6 +1,8 @@
 import { chapter } from "../content/chapters/chapter1.js";
 import { fetchProgress, markLessonComplete } from "./progress.js";
 
+const WELCOME = "welcome"; // currentIndex sentinel for the chapter welcome page
+
 const lessonStepLabel = document.getElementById("lesson-step-label");
 const lessonContent = document.getElementById("lesson-content");
 const practiceBox = document.getElementById("practice-box");
@@ -17,12 +19,23 @@ const lessonSelect = document.getElementById("lesson-select");
 const lessonTitle = document.getElementById("lesson-title");
 
 let pyodide = null;
-let currentIndex = 0;
+let currentIndex = WELCOME; // WELCOME, or a 0-based index into chapter.lessons
 let lastOutput = "";
 let currentProfile = null;
 let completedLessons = new Set(); // 1-based lesson numbers completed by currentProfile in this chapter
 
+// A lesson is locked until the lesson before it is completed. The first
+// lesson (index 0) is always unlocked; the welcome page is always unlocked.
+function isLessonLocked(index) {
+  return index > 0 && !completedLessons.has(index);
+}
+
 function renderLesson() {
+  if (currentIndex === WELCOME) {
+    renderWelcome();
+    return;
+  }
+
   const lesson = chapter.lessons[currentIndex];
   const lessonNumber = currentIndex + 1;
 
@@ -46,19 +59,58 @@ function renderLesson() {
     practiceBox.hidden = true;
   }
 
-  prevBtn.disabled = currentIndex === 0;
-  nextBtn.disabled = currentIndex === chapter.lessons.length - 1;
+  prevBtn.disabled = false; // Prev from lesson 0 goes back to Welcome, so never disabled here
+  // Next is blocked on a practice lesson until its check has passed - the
+  // lock a kid would hit is exactly "finish this one first." Lessons
+  // without practice complete themselves the moment Next is pressed, so
+  // there's nothing to block.
+  nextBtn.disabled =
+    currentIndex === chapter.lessons.length - 1 ||
+    (Boolean(lesson.practice) && !completedLessons.has(lessonNumber));
+}
+
+function renderWelcome() {
+  lessonTitle.textContent = `Chapter ${chapter.number}: ${chapter.title} — Welcome`;
+  lessonStepLabel.textContent = "Welcome";
+  renderLessonSelect();
+  lessonContent.innerHTML = chapter.welcome.content;
+  codeInput.value = "# Pick a lesson above (or press Next) to start writing code!";
+  outputContent.textContent = "";
+  errorsContent.textContent = "";
+  errorsPane.hidden = true;
+  lastOutput = "";
+
+  practiceFeedback.hidden = true;
+  practiceFeedback.className = "practice-feedback";
+  practiceBox.hidden = true;
+
+  prevBtn.disabled = true;
+  nextBtn.disabled = false;
 }
 
 function renderLessonSelect() {
   lessonSelect.innerHTML = "";
+
+  const group = document.createElement("optgroup");
+  group.label = `Chapter ${chapter.number}: ${chapter.title}`;
+
+  const welcomeOption = document.createElement("option");
+  welcomeOption.value = WELCOME;
+  welcomeOption.textContent = "👋 Welcome";
+  group.appendChild(welcomeOption);
+
   chapter.lessons.forEach((lesson, i) => {
     const option = document.createElement("option");
-    option.value = i;
-    option.textContent = `${lesson.id} — ${lesson.title}${completedLessons.has(i + 1) ? " ✓" : ""}`;
-    lessonSelect.appendChild(option);
+    option.value = String(i);
+    const locked = isLessonLocked(i);
+    const doneMark = completedLessons.has(i + 1) ? " ✓" : "";
+    option.textContent = `${lesson.id} — ${lesson.title}${doneMark}${locked ? " 🔒" : ""}`;
+    option.disabled = locked;
+    group.appendChild(option);
   });
-  lessonSelect.value = currentIndex;
+
+  lessonSelect.appendChild(group);
+  lessonSelect.value = currentIndex === WELCOME ? WELCOME : String(currentIndex);
 }
 
 async function runCurrentCode() {
@@ -112,6 +164,8 @@ _output = _buf.getvalue()
 }
 
 async function checkPractice() {
+  if (currentIndex === WELCOME) return;
+
   const lesson = chapter.lessons[currentIndex];
   if (!lesson.practice) return;
 
@@ -135,9 +189,10 @@ async function recordCompletion(lessonNumber) {
       lessonNumber,
     });
     completedLessons.add(lessonNumber);
-    if (lessonNumber === currentIndex + 1) {
+    if (currentIndex !== WELCOME && lessonNumber === currentIndex + 1) {
       lessonStepLabel.textContent = `Lesson ${chapter.lessons[currentIndex].id} ✓`;
       renderLessonSelect();
+      nextBtn.disabled = currentIndex === chapter.lessons.length - 1;
     }
   } catch (err) {
     // Low-stakes: a failed progress save shouldn't interrupt the kid's flow.
@@ -147,12 +202,16 @@ async function recordCompletion(lessonNumber) {
 
 runBtn.addEventListener("click", runCurrentCode);
 prevBtn.addEventListener("click", () => {
-  if (currentIndex > 0) {
-    currentIndex -= 1;
-    renderLesson();
-  }
+  if (currentIndex === WELCOME) return;
+  currentIndex = currentIndex === 0 ? WELCOME : currentIndex - 1;
+  renderLesson();
 });
 nextBtn.addEventListener("click", async () => {
+  if (currentIndex === WELCOME) {
+    currentIndex = 0;
+    renderLesson();
+    return;
+  }
   if (currentIndex >= chapter.lessons.length - 1) return;
 
   const lesson = chapter.lessons[currentIndex];
@@ -164,7 +223,21 @@ nextBtn.addEventListener("click", async () => {
   renderLesson();
 });
 lessonSelect.addEventListener("change", () => {
-  currentIndex = Number(lessonSelect.value);
+  if (lessonSelect.value === WELCOME) {
+    currentIndex = WELCOME;
+    renderLesson();
+    return;
+  }
+
+  const index = Number(lessonSelect.value);
+  if (isLessonLocked(index)) {
+    // Shouldn't be reachable since locked options are disabled, but guard
+    // against it anyway rather than silently jumping ahead.
+    renderLessonSelect();
+    return;
+  }
+
+  currentIndex = index;
   renderLesson();
 });
 
@@ -179,10 +252,14 @@ export async function startApp(profile) {
     completedLessons = new Set();
   }
 
-  // Resume at the first not-yet-completed lesson, rather than always
-  // restarting at 1.1 regardless of prior progress.
-  const resumeIndex = chapter.lessons.findIndex((_, i) => !completedLessons.has(i + 1));
-  currentIndex = resumeIndex === -1 ? chapter.lessons.length - 1 : resumeIndex;
+  if (completedLessons.size === 0) {
+    currentIndex = WELCOME;
+  } else {
+    // Resume at the first not-yet-completed lesson, rather than always
+    // restarting at 1.1 regardless of prior progress.
+    const resumeIndex = chapter.lessons.findIndex((_, i) => !completedLessons.has(i + 1));
+    currentIndex = resumeIndex === -1 ? chapter.lessons.length - 1 : resumeIndex;
+  }
 
   renderLesson();
   outputContent.textContent = "Loading Python (first load only takes a few seconds)…";
