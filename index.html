@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code School</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Code School</h1>
+    <p id="lesson-title">Loading lesson…</p>
+  </header>
+
+  <main class="lesson-grid">
+    <section class="pane lesson-pane" aria-label="Lesson">
+      <div class="pane-header">
+        <span id="lesson-step-label">Lesson</span>
+        <div class="lesson-nav">
+          <button id="prev-lesson-btn" type="button">&larr; Prev</button>
+          <button id="next-lesson-btn" type="button">Next &rarr;</button>
+        </div>
+      </div>
+      <div id="lesson-content">Loading…</div>
+      <div id="practice-box" class="practice-box" hidden>
+        <h2>Practice</h2>
+        <p id="practice-instructions"></p>
+        <button id="check-btn" type="button">Check My Work</button>
+      </div>
+    </section>
+
+    <section class="pane editor-pane" aria-label="Code editor">
+      <div class="pane-header">
+        <span>Your Code</span>
+        <button id="run-btn" type="button">Run ▶</button>
+      </div>
+      <textarea id="code-input" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    </section>
+
+    <section class="pane output-pane" aria-label="Output">
+      <div class="pane-header">
+        <span>Output</span>
+      </div>
+      <pre id="output-content"></pre>
+      <p id="practice-feedback" class="practice-feedback" hidden></p>
+    </section>
+  </main>
+
+  <!-- Pyodide, loaded from its official CDN. Cached by the browser after first load. -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # Code School
 
-A free, browser-based, Codecademy-style Python learning app, built by James and his sons as a homeschool + family coding project. Runs on any device (Mac, iPad) with zero recurring cost.
+A free, browser-based Python learning app, built by James and his sons as a homeschool + family coding project. Runs on any device (Mac, iPad) with zero recurring cost.
 
 ## Why this exists
 

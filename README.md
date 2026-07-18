@@ -1,6 +1,6 @@
 # Code School
 
-A free, browser-based, Codecademy-style Python learning app — built by James and his sons as a homeschool and family coding project.
+A free, browser-based Python learning app — built by James and his sons as a homeschool and family coding project.
 
 It runs entirely client-side (Python via [Pyodide](https://pyodide.org/), compiled to WebAssembly) and is hosted on GitHub Pages, so it works identically on a Mac or an iPad with zero recurring cost. No installs, no per-execution server cost, works offline after the first load.
 
