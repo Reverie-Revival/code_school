@@ -7,6 +7,10 @@ metadata:
 
 Code School is a free, browser-based Python learning app for James's two sons, built as a homeschool/family project. It is its own original design — do not describe or reference it as similar to/styled after any other named coding-education product, even if some design/functionality ideas are informally inspired by things James has seen elsewhere.
 
+**Critical — token transparency:** James cannot see what's happening during a long unbroken stretch of tool calls (tests, file edits, debugging, etc.) — he only sees text you write. Hard cutoff: **5,000 tokens** of tool-call activity without a user-facing text update is too long. Before crossing that, pause and tell him what you're doing and why (a sentence or two is enough) before continuing. This applies even mid-task — don't wait for a natural stopping point if the cutoff is reached first.
+
+**Why:** James was surprised to find a single stretch had burned ~12k tokens with no visibility into what was happening.
+
 **Budget:** $0. Every tool/service choice must have a free tier that fully covers this project's scale (GitHub Pages, Pyodide, Supabase free tier). Flag anything that risks incurring cost before adopting it.
 
 **Stack:** Pyodide (client-side Python execution in-browser, WASM) + GitHub Pages hosting (free, works identically on Mac/iPad) + Supabase for progress storage. Supabase structure: James's existing personal `beja0502` org (same org as the separate, isolated `Forge Anchor` project — org-level grouping only, not a shared database), a dedicated **Project** named `family_hub` (the org's second free-tier project slot), with a `code_school` schema and basic RLS so kid profiles can't read/write each other's rows. `family_hub` is expected to also host a `meridian_almanac` schema later.
