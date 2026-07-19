@@ -251,6 +251,46 @@ body {
   background: var(--bg);
 }
 
+#lesson-content code {
+  background: var(--bg-pane);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+#lesson-content pre {
+  background: var(--code-bg);
+  color: var(--code-text);
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+#lesson-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+.lesson-tip {
+  background: #fff8e1;
+  border-left: 3px solid #d97706;
+  border-radius: 4px;
+  padding: 0.6rem 0.85rem;
+  margin: 1rem 0;
+}
+
+.lesson-recap {
+  border-top: 1px dashed var(--border);
+  padding-top: 0.75rem;
+  margin-top: 1.25rem;
+  color: #444;
+}
+
 .editor-pane {
   grid-area: editor;
 }
