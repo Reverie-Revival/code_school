@@ -68,7 +68,7 @@ Reference material: include a simple, always-accessible cheat sheet / glossary (
 ### Data model (`code_school` schema — see [migrations](supabase/migrations/))
 
 - `profiles`: id, display_name, avatar_color, pin (plain text, optional), created_at
-- `progress`: profile_id, chapter_number, lesson_number, completed_at, parent_approved_at (for chapter-project checkpoints), created_at
+- `progress`: profile_id, chapter_number, lesson_number (null for a chapter-level Project checkpoint), completed_at, created_at
 
 ### Known low-stakes gotcha
 

@@ -33,9 +33,7 @@ export async function markLessonComplete({ profileId, chapterNumber, lessonNumbe
 // instead, so a re-click doesn't insert duplicates.
 //
 // This is a kid self-click ("I showed someone!"), not a parent approval —
-// parent_approved_at is intentionally left null. That column exists in the
-// schema for a parent-gated flow, which this project deliberately doesn't
-// use (see CLAUDE.md's "Parent gate" principle and project_ideas.md).
+// see CLAUDE.md's "Self check-in" principle.
 export async function markProjectDone({ profileId, chapterNumber }) {
   const { data: existing, error: selectError } = await supabaseClient
     .from("progress")
