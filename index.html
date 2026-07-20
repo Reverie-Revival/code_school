@@ -9,8 +9,8 @@
 <body>
   <header class="app-header">
     <h1>Code School</h1>
-    <p id="lesson-title">Loading lesson…</p>
-    <select id="lesson-select" aria-label="Jump to chapter/lesson" class="header-lesson-select"></select>
+    <p id="lesson-title" hidden>Loading lesson…</p>
+    <select id="lesson-select" aria-label="Jump to chapter/lesson" class="header-lesson-select" hidden></select>
     <div id="current-profile-badge" class="current-profile-badge" hidden>
       <span id="current-profile-name"></span>
       <button id="switch-profile-btn" type="button">Switch</button>
@@ -79,7 +79,22 @@
         <span>Output</span>
       </div>
       <pre id="output-content"></pre>
-      <p id="practice-feedback" class="practice-feedback" hidden></p>
+      <div id="practice-feedback" class="practice-feedback" hidden>
+        <p id="practice-feedback-text"></p>
+        <div class="practice-feedback-actions" id="practice-feedback-actions" hidden>
+          <button
+            id="help-btn"
+            type="button"
+            title="Stuck? Help fills in working code for this lesson so you can see it run correctly — then press Run."
+          >Help</button>
+          <button
+            id="reset-btn"
+            type="button"
+            title="Changed your mind about Help? Reset brings back the code you had right before you clicked it."
+            disabled
+          >Reset</button>
+        </div>
+      </div>
     </section>
 
     <section class="pane errors-pane" aria-label="Errors" id="errors-pane" hidden>
@@ -87,6 +102,10 @@
         <span>Errors</span>
       </div>
       <pre id="errors-content"></pre>
+      <div id="error-hint" class="error-hint">
+        <span class="lesson-label">How To Fix It</span>
+        <p id="error-hint-text"></p>
+      </div>
     </section>
   </main>
 

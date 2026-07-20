@@ -22,12 +22,17 @@ What the boys land on before Lesson 1 of each chapter (already built as a concep
 
 Every lesson (practice or not) follows the same shape. Roughly a few paragraphs total per CLAUDE.md's own "short explanation, one concept" rule — this template organizes those paragraphs, it doesn't lengthen them.
 
-1. **The Concept** — the core explanation. One idea only. This is most of what already exists in lessons 1.1/1.2.
-2. **See It In Action** — a small worked example, shown and briefly explained (not left for the kid to figure out cold). For lessons without practice (like 1.1), this can just *be* the starter code they run. For practice lessons, this is a separate example distinct from the blank/stub they'll edit.
+**Revised 2026-07-19 after James tested Chapter 1 solo-completion and found it too easy to lose the thread** — a kid working alone couldn't reliably tell "this is something to just read" from "this is the thing I do," and the example didn't actually prepare them for the assignment. Two structural rules now apply on top of the section list below:
+
+- **Every section gets a visually distinct, labeled callout** — not just Watch Out/Recap. Example = blue box labeled "Example," Your Turn = green box labeled "Your Turn," Watch Out = orange/yellow (unchanged), Recap = neutral gray. A kid should be able to tell which section they're in without reading the prose, just the color/label.
+- **The example's shape must match the assignment's shape** — same number of items, same mix of types (string vs. number), same number of lines, etc. Vary the *content* (different words/numbers), never the *structure*. If the assignment asks for three comma-separated items and the example only showed two, that jump itself is the confusing part — fix it by extending the example, not by explaining the gap in prose. This was the concrete bug in the original 1.3: example showed 2 items, assignment asked for 3, and nothing bridged why or how the string/number quoting rule applied to the new third item.
+
+1. **The Concept** — the core explanation. One idea only, 2-3 sentences before the Example box — don't let prose pile up before the kid reaches something concrete.
+2. **Example** *(blue callout, labeled)* — a worked example whose shape already matches the assignment below it (see rule above). For lessons without practice (like 1.1), this can just *be* the starter code they run. Briefly explain any part of the example that maps onto something the assignment will need (e.g., "Round" and "Begins" are in quotes because they're words; `2` isn't, because it's a number") — say it here, next to the example, not just once in general prose.
 3. **Real-World Tie-In** *(optional, lean into it more as chapters get more abstract)* — one or two sentences connecting the concept to something concrete. Skip it where it'd feel forced (e.g., naming-variable rules don't need a metaphor); use it where it earns its place (functions, dictionaries, loops).
-4. **Watch Out For...** — a short, specific heads-up about the one mistake beginners actually make with this exact concept (forgetting quotes, capitalization mattering, off-by-one in `range()`, etc.) — not a generic "be careful" line.
-5. **Your Turn** — the practice exercise (unchanged mechanically from what's built: instructions + auto-check on Run).
-6. **Quick Recap** — one bolded takeaway sentence closing the lesson out.
+4. **Watch Out For...** *(orange callout, labeled — unchanged from before)* — a short, specific heads-up about the one mistake beginners actually make with this exact concept (forgetting quotes, capitalization mattering, off-by-one in `range()`, etc.) — not a generic "be careful" line.
+5. **Your Turn** *(green callout, labeled)* — explicitly bridges back to the Example by name ("Same pattern as the example above, but…") and, if the assignment's target has multiple pieces, walks through what each piece is (word vs. number → quotes or not) rather than assuming the earlier general explanation carries over. Ends by pointing at the actual editor ("Head to the code box on the right, fix it, and press Run"). The literal graded instructions still live in the practice box mechanically unchanged — this callout is the *why/how* leading into it, not a duplicate of it.
+6. **Quick Recap** *(neutral gray callout, labeled)* — one bolded takeaway sentence closing the lesson out.
 
 ## 3. Project
 

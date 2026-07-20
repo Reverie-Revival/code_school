@@ -19,7 +19,7 @@ Code School is a free, browser-based Python learning app for James's two sons, b
 
 **Scope (v1):** Python only, 15 chapters, Lesson → Practice → Project rhythm. Projects are assigned per-chapter (not a fixed 4/8/11/15 schedule — see [curriculum/python/outline.md](../curriculum/python/outline.md) for the current assignment), not auto-graded. How a finished Project actually gets verified is still an open decision (see `memory/project_ideas.md`) — not a parent-approval gate; lesson-to-lesson progression already gates on passing that lesson's practice check instead. Full course outline lives in [CLAUDE.md](../CLAUDE.md) — treat that as the source of truth for build/process state; [curriculum/python/outline.md](../curriculum/python/outline.md) is the source of truth for the actual curriculum content.
 
-**Current phase:** Chapter 1 (Lessons 1.1–1.2) working end-to-end in the browser — lesson content, Pyodide code execution, and practice auto-check all verified. Supabase/progress-persistence and the profile picker are not built yet. See [HANDOFF.md](../HANDOFF.md) for exact next steps.
+**Current phase:** Chapter 1 (Lessons 1.1–1.5, plus its Wrap-Up) content-complete and working end-to-end in the browser — lesson rendering, Pyodide code execution, practice auto-check, Supabase progress persistence, and the profile picker are all built and verified. Chapters 2–15 not started. See [HANDOFF.md](../HANDOFF.md) for exact next steps.
 
 **Why:** A way for James and his sons to build something together while giving them a real guided path into Python — not just a tool being handed to them.
 

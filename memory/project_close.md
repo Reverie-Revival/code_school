@@ -7,7 +7,7 @@ metadata:
 
 When James signals the session is ending ("let's end the session," "let's close it out," or equivalent):
 
-1. File any concrete follow-ups discovered this session as GitHub Issues on `Reverie-Revival/code_school` (see [[project-workflow]]).
+1. File any concrete follow-ups discovered this session in `memory/project_ideas.md` — **not** GitHub Issues, per [[project-workflow]]'s correction of this step.
 2. Rewrite HANDOFF.md with what was actually done, what was discovered, any blockers, and a real (not placeholder) Next Up list.
 3. Run `/housekeeping` for a code/docs/memory tidy pass.
 4. Sync memory files — update any that changed (stack decisions, scope changes, new safety considerations), keep MEMORY.md's index accurate and under ~150 lines.

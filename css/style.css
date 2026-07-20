@@ -276,6 +276,27 @@ body {
   color: inherit;
 }
 
+.lesson-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.lesson-example {
+  background: #eef4ff;
+  border-left: 3px solid #2563eb;
+  border-radius: 4px;
+  padding: 0.6rem 0.85rem;
+  margin: 1rem 0;
+}
+
+.lesson-example .lesson-label {
+  color: #2563eb;
+}
+
 .lesson-tip {
   background: #fff8e1;
   border-left: 3px solid #d97706;
@@ -284,11 +305,31 @@ body {
   margin: 1rem 0;
 }
 
+.lesson-tip .lesson-label {
+  color: #d97706;
+}
+
+.lesson-turn {
+  background: #eefbf1;
+  border-left: 3px solid #16a34a;
+  border-radius: 4px;
+  padding: 0.6rem 0.85rem;
+  margin: 1rem 0;
+}
+
+.lesson-turn .lesson-label {
+  color: #16a34a;
+}
+
 .lesson-recap {
   border-top: 1px dashed var(--border);
   padding-top: 0.75rem;
   margin-top: 1.25rem;
   color: #444;
+}
+
+.lesson-recap .lesson-label {
+  color: #6b7280;
 }
 
 .editor-pane {
@@ -317,6 +358,24 @@ body {
   font-family: "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.9rem;
   color: var(--error);
+}
+
+.error-hint {
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-left: 3px solid var(--error);
+  border-radius: 4px;
+}
+
+.error-hint .lesson-label {
+  color: var(--error);
+}
+
+.error-hint p {
+  margin: 0;
+  color: #444;
+  font-size: 0.9rem;
 }
 
 .pane-header {
@@ -403,6 +462,10 @@ body {
   margin-top: 0.75rem;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
+}
+
+.practice-feedback p {
+  margin: 0;
   font-weight: 600;
 }
 
@@ -414,6 +477,35 @@ body {
 .practice-feedback.failure {
   background: #fbe9e7;
   color: var(--error);
+}
+
+.practice-feedback-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.practice-feedback-actions button {
+  background: transparent;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.practice-feedback.failure .practice-feedback-actions button {
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+
+.practice-feedback-actions button:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.practice-feedback-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 @media (max-width: 900px) {

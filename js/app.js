@@ -1,5 +1,6 @@
 import { chapter } from "../curriculum/python/chapters/chapter1.js";
 import { fetchProgress, markLessonComplete } from "./progress.js";
+import { getErrorHint } from "./errorHints.js";
 
 const WELCOME = "welcome"; // currentIndex sentinel for the chapter welcome page
 
@@ -8,10 +9,15 @@ const lessonContent = document.getElementById("lesson-content");
 const practiceBox = document.getElementById("practice-box");
 const practiceInstructions = document.getElementById("practice-instructions");
 const practiceFeedback = document.getElementById("practice-feedback");
+const practiceFeedbackText = document.getElementById("practice-feedback-text");
+const practiceFeedbackActions = document.getElementById("practice-feedback-actions");
 const codeInput = document.getElementById("code-input");
 const outputContent = document.getElementById("output-content");
 const errorsPane = document.getElementById("errors-pane");
 const errorsContent = document.getElementById("errors-content");
+const errorHintText = document.getElementById("error-hint-text");
+const helpBtn = document.getElementById("help-btn");
+const resetBtn = document.getElementById("reset-btn");
 const runBtn = document.getElementById("run-btn");
 const prevBtn = document.getElementById("prev-lesson-btn");
 const nextBtn = document.getElementById("next-lesson-btn");
@@ -23,6 +29,7 @@ let currentIndex = WELCOME; // WELCOME, or a 0-based index into chapter.lessons
 let lastOutput = "";
 let currentProfile = null;
 let completedLessons = new Set(); // 1-based lesson numbers completed by currentProfile in this chapter
+let preHelpCode = null; // snapshot of code-input right before Help overwrote it, or null if unused
 
 // A lesson is locked until the lesson before it is completed. The first
 // lesson (index 0) is always unlocked; the welcome page is always unlocked.
@@ -48,9 +55,11 @@ function renderLesson() {
   errorsContent.textContent = "";
   errorsPane.hidden = true;
   lastOutput = "";
+  resetHelpState();
 
   practiceFeedback.hidden = true;
   practiceFeedback.className = "practice-feedback";
+  practiceFeedbackActions.hidden = true;
 
   if (lesson.practice) {
     practiceBox.hidden = false;
@@ -79,9 +88,11 @@ function renderWelcome() {
   errorsContent.textContent = "";
   errorsPane.hidden = true;
   lastOutput = "";
+  resetHelpState();
 
   practiceFeedback.hidden = true;
   practiceFeedback.className = "practice-feedback";
+  practiceFeedbackActions.hidden = true;
   practiceBox.hidden = true;
 
   prevBtn.disabled = true;
@@ -118,9 +129,11 @@ async function runCurrentCode() {
   runBtn.disabled = true;
   outputContent.textContent = "Running…";
   errorsContent.textContent = "";
+  errorHintText.textContent = "";
   errorsPane.hidden = true;
   practiceFeedback.hidden = true;
   practiceFeedback.className = "practice-feedback";
+  practiceFeedbackActions.hidden = true;
 
   try {
     pyodide.globals.set("__user_code", codeInput.value);
@@ -144,6 +157,7 @@ _output = _buf.getvalue()
 
     if (error) {
       errorsContent.textContent = error;
+      errorHintText.textContent = getErrorHint(error);
       errorsPane.hidden = false;
     } else {
       // Every successful run doubles as a practice check when the lesson
@@ -156,10 +170,16 @@ _output = _buf.getvalue()
     lastOutput = "";
     outputContent.textContent = "(no output)";
     errorsContent.textContent = `Something went wrong running your code: ${err}`;
+    errorHintText.textContent = getErrorHint(String(err));
     errorsPane.hidden = false;
   } finally {
     runBtn.disabled = false;
   }
+}
+
+function resetHelpState() {
+  preHelpCode = null;
+  resetBtn.disabled = true;
 }
 
 async function checkPractice() {
@@ -170,10 +190,15 @@ async function checkPractice() {
 
   const result = lesson.practice.check(lastOutput);
   practiceFeedback.hidden = false;
-  practiceFeedback.textContent = result.message;
+  practiceFeedbackText.textContent = result.message;
   practiceFeedback.className = `practice-feedback ${result.pass ? "success" : "failure"}`;
 
+  // Help/Reset only make sense on a failed attempt, and only when this
+  // lesson has a known-correct solution to offer.
+  practiceFeedbackActions.hidden = result.pass || !lesson.practice.solution;
+
   if (result.pass) {
+    resetHelpState();
     await recordCompletion(currentIndex + 1);
   }
 }
@@ -200,6 +225,25 @@ async function recordCompletion(lessonNumber) {
 }
 
 runBtn.addEventListener("click", runCurrentCode);
+helpBtn.addEventListener("click", () => {
+  if (currentIndex === WELCOME) return;
+  const lesson = chapter.lessons[currentIndex];
+  if (!lesson.practice || !lesson.practice.solution) return;
+
+  // Only snapshot the first time Help is pressed for this lesson, so a
+  // second press doesn't overwrite the snapshot with the already-helped
+  // code (which would make Reset a no-op).
+  if (preHelpCode === null) {
+    preHelpCode = codeInput.value;
+    resetBtn.disabled = false;
+  }
+  codeInput.value = lesson.practice.solution;
+});
+resetBtn.addEventListener("click", () => {
+  if (preHelpCode === null) return;
+  codeInput.value = preHelpCode;
+  resetHelpState();
+});
 prevBtn.addEventListener("click", () => {
   if (currentIndex === WELCOME) return;
   currentIndex = currentIndex === 0 ? WELCOME : currentIndex - 1;
@@ -242,6 +286,8 @@ lessonSelect.addEventListener("change", () => {
 
 export async function startApp(profile) {
   currentProfile = profile;
+  lessonTitle.hidden = false;
+  lessonSelect.hidden = false;
 
   try {
     const rows = await fetchProgress(currentProfile.id, chapter.number);

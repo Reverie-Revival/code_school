@@ -10,7 +10,7 @@ Each chapter follows the same rhythm: **Lesson → Practice → Project → Pare
 
 - **Lesson** — a short explanation of one small idea.
 - **Practice** — a tiny code exercise right after, auto-checked for instant feedback.
-- **Project** — at checkpoint chapters only (4, 8, 11, 15), a bigger exercise pulling together everything learned so far.
+- **Project** — at select chapters (assigned based on whether there's enough material yet for something genuinely interesting, not a fixed schedule), a bigger exercise pulling together everything learned so far.
 - **Parent gate** — projects aren't auto-graded. The kid shows the finished project to a parent, who marks the chapter complete and unlocks the next one.
 
 15 chapters total, starting from `print()` and ending with a capstone project combining lists, loops, functions, and dictionaries. Progress is tracked separately per kid via lightweight profiles (no passwords) backed by Supabase.
