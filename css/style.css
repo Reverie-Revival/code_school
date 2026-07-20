@@ -8,6 +8,8 @@
   --code-bg: #1e1e1e;
   --code-text: #f4f4f4;
   --error: #b3261e;
+  --warn: #9a5b00;
+  --warn-bg: #fff1da;
 }
 
 * {
@@ -392,6 +394,27 @@ body {
   white-space: nowrap;
 }
 
+#project-done-btn {
+  margin-top: 0.75rem;
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#project-done-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+#project-done-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 #run-btn,
 .lesson-nav button {
   background: var(--accent);
@@ -475,8 +498,9 @@ body {
 }
 
 .practice-feedback.failure {
-  background: #fbe9e7;
-  color: var(--error);
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-left: 3px solid var(--warn);
 }
 
 .practice-feedback-actions {
@@ -495,8 +519,8 @@ body {
 }
 
 .practice-feedback.failure .practice-feedback-actions button {
-  color: var(--error);
-  border: 1px solid var(--error);
+  color: var(--warn);
+  border: 1px solid var(--warn);
 }
 
 .practice-feedback-actions button:hover:not(:disabled) {

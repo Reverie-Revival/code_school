@@ -42,7 +42,7 @@ Structurally different from a lesson — bigger, more open-ended, not strictly a
 2. **What You'll Use** — a short, explicit list of which tools from *this* chapter and *prior* chapters this project pulls together. Makes the cascade visible instead of implicit — "this uses input() from ch. 5, if/else from ch. 7, and what you just learned about elif."
 3. **Step-by-Step Guidance** — unlike a lesson's practice, Projects get real scaffolding: a short numbered list of build steps (not the full solution, just the shape — "Step 1: ask for three words. Step 2: ..."). Heavier guidance here is appropriate specifically *because* Projects aren't auto-graded — there's no check to spoil.
 4. **Starter Code** — more substantial than a lesson's starter, likely with comments marking where to fill in, since building a whole project from a blank editor is a bigger ask than a 2–3 line practice.
-5. **When You're Done** — placeholder pending `project_ideas.md`'s still-open Project-verification decision. Whatever that resolves to (candidate direction: "ran without erroring" + a self-click "I showed someone!" button) plugs in here. Not writing this section's actual behavior yet — noting where it goes.
+5. **When You're Done** — decided and built 2026-07-19: no lesson content needed here (it's app chrome, not authored content). The kid runs their code until it executes with no error (reusing the Errors panel), then self-clicks an **I showed someone! ✓** button after showing their work to someone — that unlocks the next chapter. No parent action required in-app. See CLAUDE.md's "Self check-in" principle.
 
 ---
 
@@ -56,7 +56,7 @@ Concrete, not hypothetical — here's roughly how the template maps onto what's 
 
 ---
 
-## What this means for the app (not doing yet, flagging for later)
+## What this means for the app
 
-- The lesson-pane already renders raw HTML (`lesson.content`), so most of this template is just more structured HTML within that same field — a few new CSS classes (e.g. a distinct look for "Watch Out For" callouts) would help it read clearly, not a big change.
-- **Projects don't exist as a distinct content type yet** — `content`'s data model only has a `lessons` array with an optional `practice`. Before any real Project content can be written, we need a `chapter.project` shape and a rendering path in `js/app.js` distinct from a lesson (different layout needs: step-by-step guidance, bigger starter code, the "When You're Done" self-report mechanism once that's decided). Real build work, not something to start until this template is approved.
+- The lesson-pane already renders raw HTML (`lesson.content`), so most of this template is just more structured HTML within that same field — the callout CSS classes (`.lesson-example`, `.lesson-tip`, `.lesson-turn`, `.lesson-recap`) already exist in `css/style.css`.
+- **Projects now exist as a distinct content type** (built 2026-07-19): `chapter.project = { title, content, starterCode }` in a chapter's data file, rendered by `renderProject()` in `js/app.js` — its own dropdown entry, locked until all of the chapter's lessons are done, with the self check-in button described above. `project.content` is one HTML blob authored the same way as a lesson's `content` (Challenge / What You'll Use / Step-by-Step Guidance / Starter Code sections above can just be callout `<div>`s within it, same pattern as a lesson). No chapter has real Project content yet — Chapter 3's Mad Libs will be the first.

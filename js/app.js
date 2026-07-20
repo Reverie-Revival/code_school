@@ -1,13 +1,16 @@
-import { chapter } from "../curriculum/python/chapters/chapter1.js";
-import { fetchProgress, markLessonComplete } from "./progress.js";
+import { chapters } from "../curriculum/python/chapters/index.js";
+import { fetchProgress, markLessonComplete, markProjectDone } from "./progress.js";
 import { getErrorHint } from "./errorHints.js";
 
 const WELCOME = "welcome"; // currentIndex sentinel for the chapter welcome page
+const PROJECT = "project"; // currentIndex sentinel for the chapter's end-of-chapter Project
 
 const lessonStepLabel = document.getElementById("lesson-step-label");
 const lessonContent = document.getElementById("lesson-content");
 const practiceBox = document.getElementById("practice-box");
 const practiceInstructions = document.getElementById("practice-instructions");
+const projectBox = document.getElementById("project-box");
+const projectDoneBtn = document.getElementById("project-done-btn");
 const practiceFeedback = document.getElementById("practice-feedback");
 const practiceFeedbackText = document.getElementById("practice-feedback-text");
 const practiceFeedbackActions = document.getElementById("practice-feedback-actions");
@@ -25,11 +28,40 @@ const lessonSelect = document.getElementById("lesson-select");
 const lessonTitle = document.getElementById("lesson-title");
 
 let pyodide = null;
+let currentChapterIndex = 0; // index into `chapters`
+let chapter = chapters[0];
 let currentIndex = WELCOME; // WELCOME, or a 0-based index into chapter.lessons
 let lastOutput = "";
 let currentProfile = null;
-let completedLessons = new Set(); // 1-based lesson numbers completed by currentProfile in this chapter
+let completedByChapter = new Map(); // chapter.number -> Set of 1-based completed lesson numbers
+let completedLessons = new Set(); // same Set as completedByChapter.get(chapter.number), for the active chapter
+let projectDoneByChapter = new Map(); // chapter.number -> true, once the kid has self-marked its Project done
+let projectRanCleanly = false; // whether the current Project's code has run with no error since last entering this page
 let preHelpCode = null; // snapshot of code-input right before Help overwrote it, or null if unused
+
+function completedFor(chapterMeta) {
+  if (!completedByChapter.has(chapterMeta.number)) {
+    completedByChapter.set(chapterMeta.number, new Set());
+  }
+  return completedByChapter.get(chapterMeta.number);
+}
+
+// A chapter counts as done once every lesson is complete and — if it has a
+// Project — the kid has self-marked that Project done too (see the "Parent
+// gate" principle in CLAUDE.md: Projects aren't auto-graded, and this is
+// deliberately kid-driven, not a parent approval step).
+function isChapterDone(chapterMeta) {
+  const lessonsDone = completedFor(chapterMeta).size >= chapterMeta.lessons.length;
+  const projectDone = !chapterMeta.project || projectDoneByChapter.get(chapterMeta.number);
+  return lessonsDone && projectDone;
+}
+
+// A chapter is locked until the chapter before it is done. The first
+// chapter is always unlocked.
+function isChapterLocked(chapterIdx) {
+  if (chapterIdx === 0) return false;
+  return !isChapterDone(chapters[chapterIdx - 1]);
+}
 
 // A lesson is locked until the lesson before it is completed. The first
 // lesson (index 0) is always unlocked; the welcome page is always unlocked.
@@ -37,9 +69,19 @@ function isLessonLocked(index) {
   return index > 0 && !completedLessons.has(index);
 }
 
+function switchToChapter(chapterIdx) {
+  currentChapterIndex = chapterIdx;
+  chapter = chapters[chapterIdx];
+  completedLessons = completedFor(chapter);
+}
+
 function renderLesson() {
   if (currentIndex === WELCOME) {
     renderWelcome();
+    return;
+  }
+  if (currentIndex === PROJECT) {
+    renderProject();
     return;
   }
 
@@ -60,6 +102,7 @@ function renderLesson() {
   practiceFeedback.hidden = true;
   practiceFeedback.className = "practice-feedback";
   practiceFeedbackActions.hidden = true;
+  projectBox.hidden = true;
 
   if (lesson.practice) {
     practiceBox.hidden = false;
@@ -72,10 +115,11 @@ function renderLesson() {
   // Next is blocked on a practice lesson until its check has passed - the
   // lock a kid would hit is exactly "finish this one first." Lessons
   // without practice complete themselves the moment Next is pressed, so
-  // there's nothing to block.
-  nextBtn.disabled =
-    currentIndex === chapter.lessons.length - 1 ||
-    (Boolean(lesson.practice) && !completedLessons.has(lessonNumber));
+  // there's nothing to block here even at the last lesson of a chapter —
+  // the click handler itself decides whether that press also completes the
+  // lesson and/or crosses into the next chapter (a no-op if there's nowhere
+  // to go yet, e.g. the last chapter the app knows about).
+  nextBtn.disabled = Boolean(lesson.practice) && !completedLessons.has(lessonNumber);
 }
 
 function renderWelcome() {
@@ -94,33 +138,94 @@ function renderWelcome() {
   practiceFeedback.className = "practice-feedback";
   practiceFeedbackActions.hidden = true;
   practiceBox.hidden = true;
+  projectBox.hidden = true;
 
   prevBtn.disabled = true;
   nextBtn.disabled = false;
 }
 
+function renderProject() {
+  const project = chapter.project;
+
+  lessonTitle.textContent = `Chapter ${chapter.number}: ${chapter.title} — Project: ${project.title}`;
+  renderLessonSelect();
+  lessonContent.innerHTML = project.content;
+  codeInput.value = project.starterCode;
+  outputContent.textContent = "";
+  errorsContent.textContent = "";
+  errorsPane.hidden = true;
+  lastOutput = "";
+  resetHelpState();
+
+  practiceFeedback.hidden = true;
+  practiceFeedback.className = "practice-feedback";
+  practiceFeedbackActions.hidden = true;
+  practiceBox.hidden = true;
+
+  projectBox.hidden = false;
+  // Require a fresh clean run each time the Project page is (re)entered —
+  // encourages actually running the code again, not just remembering an
+  // old run from before an edit.
+  projectRanCleanly = false;
+  updateProjectDoneButton();
+
+  prevBtn.disabled = false; // Prev goes back to the chapter's last lesson
+}
+
+// Keeps the "I showed someone!" button and its label in sync with whether
+// this chapter's Project is already done, and whether the code has run
+// cleanly (no error) since the Project page was last entered.
+function updateProjectDoneButton() {
+  const done = Boolean(projectDoneByChapter.get(chapter.number));
+  lessonStepLabel.textContent = `Project${done ? " ✓" : ""}`;
+  projectDoneBtn.disabled = done || !projectRanCleanly;
+  projectDoneBtn.textContent = done ? "Chapter Complete ✓" : "I showed someone! ✓";
+  // Next only crosses into the next chapter once this Project is done —
+  // that's the whole point of the (kid-driven) gate.
+  nextBtn.disabled = !done || currentChapterIndex + 1 >= chapters.length;
+}
+
 function renderLessonSelect() {
   lessonSelect.innerHTML = "";
 
-  // The chapter's own name doubles as the selectable entry for its welcome
-  // page — no separate "Welcome" item. Lessons are visually nested under it
-  // with a leading indent (a plain <select> has no real hierarchy to lean on).
-  const chapterOption = document.createElement("option");
-  chapterOption.value = WELCOME;
-  chapterOption.textContent = `Chapter ${chapter.number}: ${chapter.title}`;
-  lessonSelect.appendChild(chapterOption);
+  chapters.forEach((chapterMeta, chapterIdx) => {
+    const locked = isChapterLocked(chapterIdx);
+    const chCompleted = completedFor(chapterMeta);
 
-  chapter.lessons.forEach((lesson, i) => {
-    const option = document.createElement("option");
-    option.value = String(i);
-    const locked = isLessonLocked(i);
-    const doneMark = completedLessons.has(i + 1) ? " ✓" : "";
-    option.textContent = `    ${lesson.id} — ${lesson.title}${doneMark}${locked ? " 🔒" : ""}`;
-    option.disabled = locked;
-    lessonSelect.appendChild(option);
+    const group = document.createElement("optgroup");
+    group.label = `Chapter ${chapterMeta.number}: ${chapterMeta.title}${locked ? " 🔒" : ""}`;
+    group.disabled = locked;
+
+    const welcomeOption = document.createElement("option");
+    welcomeOption.value = `${chapterIdx}:${WELCOME}`;
+    welcomeOption.textContent = "Welcome";
+    group.appendChild(welcomeOption);
+
+    chapterMeta.lessons.forEach((lesson, i) => {
+      const option = document.createElement("option");
+      option.value = `${chapterIdx}:${i}`;
+      const lessonLocked = locked || (i > 0 && !chCompleted.has(i));
+      const doneMark = chCompleted.has(i + 1) ? " ✓" : "";
+      option.textContent = `    ${lesson.id} — ${lesson.title}${doneMark}${lessonLocked ? " 🔒" : ""}`;
+      option.disabled = lessonLocked;
+      group.appendChild(option);
+    });
+
+    if (chapterMeta.project) {
+      const projectOption = document.createElement("option");
+      projectOption.value = `${chapterIdx}:${PROJECT}`;
+      const allLessonsDone = chCompleted.size >= chapterMeta.lessons.length;
+      const projectLocked = locked || !allLessonsDone;
+      const projectDone = projectDoneByChapter.get(chapterMeta.number);
+      projectOption.textContent = `    Project: ${chapterMeta.project.title}${projectDone ? " ✓" : ""}${projectLocked ? " 🔒" : ""}`;
+      projectOption.disabled = projectLocked;
+      group.appendChild(projectOption);
+    }
+
+    lessonSelect.appendChild(group);
   });
 
-  lessonSelect.value = currentIndex === WELCOME ? WELCOME : String(currentIndex);
+  lessonSelect.value = `${currentChapterIndex}:${currentIndex}`;
 }
 
 async function runCurrentCode() {
@@ -165,6 +270,11 @@ _output = _buf.getvalue()
       // matched what was expected. They can keep re-running freely.
       await checkPractice();
     }
+
+    if (currentIndex === PROJECT) {
+      projectRanCleanly = !error;
+      updateProjectDoneButton();
+    }
   } catch (err) {
     // Pyodide/JS-level failure (not a Python exception) — should be rare.
     lastOutput = "";
@@ -172,6 +282,10 @@ _output = _buf.getvalue()
     errorsContent.textContent = `Something went wrong running your code: ${err}`;
     errorHintText.textContent = getErrorHint(String(err));
     errorsPane.hidden = false;
+    if (currentIndex === PROJECT) {
+      projectRanCleanly = false;
+      updateProjectDoneButton();
+    }
   } finally {
     runBtn.disabled = false;
   }
@@ -183,7 +297,7 @@ function resetHelpState() {
 }
 
 async function checkPractice() {
-  if (currentIndex === WELCOME) return;
+  if (currentIndex === WELCOME || currentIndex === PROJECT) return;
 
   const lesson = chapter.lessons[currentIndex];
   if (!lesson.practice) return;
@@ -216,7 +330,7 @@ async function recordCompletion(lessonNumber) {
     if (currentIndex !== WELCOME && lessonNumber === currentIndex + 1) {
       lessonStepLabel.textContent = `Lesson ${chapter.lessons[currentIndex].id} ✓`;
       renderLessonSelect();
-      nextBtn.disabled = currentIndex === chapter.lessons.length - 1;
+      nextBtn.disabled = false;
     }
   } catch (err) {
     // Low-stakes: a failed progress save shouldn't interrupt the kid's flow.
@@ -226,7 +340,7 @@ async function recordCompletion(lessonNumber) {
 
 runBtn.addEventListener("click", runCurrentCode);
 helpBtn.addEventListener("click", () => {
-  if (currentIndex === WELCOME) return;
+  if (currentIndex === WELCOME || currentIndex === PROJECT) return;
   const lesson = chapter.lessons[currentIndex];
   if (!lesson.practice || !lesson.practice.solution) return;
 
@@ -246,6 +360,11 @@ resetBtn.addEventListener("click", () => {
 });
 prevBtn.addEventListener("click", () => {
   if (currentIndex === WELCOME) return;
+  if (currentIndex === PROJECT) {
+    currentIndex = chapter.lessons.length - 1;
+    renderLesson();
+    return;
+  }
   currentIndex = currentIndex === 0 ? WELCOME : currentIndex - 1;
   renderLesson();
 });
@@ -255,27 +374,77 @@ nextBtn.addEventListener("click", async () => {
     renderLesson();
     return;
   }
-  if (currentIndex >= chapter.lessons.length - 1) return;
+
+  // From the Project page (or a project-less chapter's last lesson once
+  // done), advance into the next chapter's Welcome, if it exists and is
+  // unlocked. A no-op otherwise — e.g. the Project isn't marked done yet, or
+  // this is the last chapter the app knows about.
+  const advanceToNextChapter = () => {
+    const nextChapterIdx = currentChapterIndex + 1;
+    if (nextChapterIdx < chapters.length && !isChapterLocked(nextChapterIdx)) {
+      switchToChapter(nextChapterIdx);
+      currentIndex = WELCOME;
+      renderLesson();
+    }
+  };
+
+  if (currentIndex === PROJECT) {
+    advanceToNextChapter();
+    return;
+  }
 
   const lesson = chapter.lessons[currentIndex];
   if (!lesson.practice) {
     await recordCompletion(currentIndex + 1);
   }
 
+  if (currentIndex >= chapter.lessons.length - 1) {
+    if (chapter.project) {
+      currentIndex = PROJECT;
+      renderLesson();
+      return;
+    }
+    advanceToNextChapter();
+    return;
+  }
+
   currentIndex += 1;
   renderLesson();
 });
 lessonSelect.addEventListener("change", () => {
-  if (lessonSelect.value === WELCOME) {
+  const [chapterIdxStr, sel] = lessonSelect.value.split(":");
+  const chapterIdx = Number(chapterIdxStr);
+
+  if (isChapterLocked(chapterIdx)) {
+    // Shouldn't be reachable since locked optgroups are disabled, but guard
+    // against it anyway rather than silently jumping ahead.
+    renderLessonSelect();
+    return;
+  }
+
+  switchToChapter(chapterIdx);
+
+  if (sel === WELCOME) {
     currentIndex = WELCOME;
     renderLesson();
     return;
   }
 
-  const index = Number(lessonSelect.value);
+  if (sel === PROJECT) {
+    const allLessonsDone = completedLessons.size >= chapter.lessons.length;
+    if (!chapter.project || !allLessonsDone) {
+      // Shouldn't be reachable since a locked Project option is disabled,
+      // but guard against it anyway rather than silently jumping ahead.
+      renderLessonSelect();
+      return;
+    }
+    currentIndex = PROJECT;
+    renderLesson();
+    return;
+  }
+
+  const index = Number(sel);
   if (isLessonLocked(index)) {
-    // Shouldn't be reachable since locked options are disabled, but guard
-    // against it anyway rather than silently jumping ahead.
     renderLessonSelect();
     return;
   }
@@ -283,27 +452,61 @@ lessonSelect.addEventListener("change", () => {
   currentIndex = index;
   renderLesson();
 });
+projectDoneBtn.addEventListener("click", async () => {
+  if (currentIndex !== PROJECT || !projectRanCleanly) return;
+  try {
+    await markProjectDone({ profileId: currentProfile.id, chapterNumber: chapter.number });
+    projectDoneByChapter.set(chapter.number, true);
+    updateProjectDoneButton();
+    renderLessonSelect();
+  } catch (err) {
+    // Low-stakes: a failed save shouldn't block the kid from moving on;
+    // they can just click again.
+    console.warn("Couldn't save project completion:", err);
+  }
+});
 
 export async function startApp(profile) {
   currentProfile = profile;
   lessonTitle.hidden = false;
   lessonSelect.hidden = false;
 
+  completedByChapter = new Map();
+  projectDoneByChapter = new Map();
   try {
-    const rows = await fetchProgress(currentProfile.id, chapter.number);
-    completedLessons = new Set(rows.map((row) => row.lesson_number));
+    const rows = await fetchProgress(currentProfile.id);
+    rows.forEach((row) => {
+      // A null lesson_number is a chapter-level Project checkpoint row, not
+      // a lesson (see the progress table's own comment).
+      if (row.lesson_number === null) {
+        if (row.completed_at) {
+          projectDoneByChapter.set(row.chapter_number, true);
+        }
+        return;
+      }
+      completedFor({ number: row.chapter_number }).add(row.lesson_number);
+    });
   } catch (err) {
     console.warn("Couldn't load progress:", err);
-    completedLessons = new Set();
   }
+
+  // Resume at the first chapter that isn't fully complete, defaulting to
+  // the last chapter if everything the app knows about is done.
+  const resumeChapterIndex = chapters.findIndex((chapterMeta) => !isChapterDone(chapterMeta));
+  switchToChapter(resumeChapterIndex === -1 ? chapters.length - 1 : resumeChapterIndex);
 
   if (completedLessons.size === 0) {
     currentIndex = WELCOME;
   } else {
     // Resume at the first not-yet-completed lesson, rather than always
-    // restarting at 1.1 regardless of prior progress.
+    // restarting at lesson 1 regardless of prior progress. If every lesson
+    // is done, resume at the Project (if this chapter has one).
     const resumeIndex = chapter.lessons.findIndex((_, i) => !completedLessons.has(i + 1));
-    currentIndex = resumeIndex === -1 ? chapter.lessons.length - 1 : resumeIndex;
+    if (resumeIndex !== -1) {
+      currentIndex = resumeIndex;
+    } else {
+      currentIndex = chapter.project ? PROJECT : chapter.lessons.length - 1;
+    }
   }
 
   renderLesson();

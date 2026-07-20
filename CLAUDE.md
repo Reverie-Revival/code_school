@@ -14,14 +14,14 @@ A hands-on way for James and his sons to build something together as a family an
 
 ## Core design principle
 
-**Lesson → Practice → Project → Parent gate.**
+**Lesson → Practice → Project → Self check-in.**
 
 - **Lesson**: a short explanation of one small idea (a few paragraphs max, one concept only).
 - **Practice**: a tiny code exercise right after the lesson (write 2–3 lines, run it, get instant automatic feedback on whether it worked). This is the repeated rep — happens after every lesson, not just at the end of a chapter.
 - **Project** (not every chapter — assigned per-chapter based on whether there's enough material yet for something genuinely interesting, not a fixed schedule; see [curriculum/python/outline.md](curriculum/python/outline.md) for the current assignment): a bigger "put it together" exercise that deliberately pulls in concepts from the *current* chapter **and** all prior chapters — not just the newest material. This is what makes the course cascade instead of just being a list of disconnected topics.
-- **Parent gate**: projects are NOT auto-graded. The kid shows the parent the finished project; the parent manually marks the chapter complete and unlocks the next one in the app. The app should make this a simple, obvious action for a parent to take (not hidden in a menu).
+- **Self check-in** (decided 2026-07-19, replacing an earlier parent-gate design — see [memory/project_ideas.md](memory/project_ideas.md)): projects are NOT auto-graded, and unlocking the next chapter is NOT a parent-approval step. Instead: the kid's code has to run without erroring (reusing the existing Errors panel), then the kid self-clicks an "I showed someone!" button once they've shown their work to someone — that unlocks the next chapter. No parent action is required in the app. James was explicit he doesn't want a parent gate blocking chapter-to-chapter progression.
 
-Practice exercises ARE auto-checked (simple output/behavior matching) so the kid gets an immediate "yep, that worked!" without waiting on a parent. Projects are NOT auto-checked — deliberately, because grading a real project well is a hard problem not worth solving for v1, and parent review is actually the better mechanism here anyway.
+Practice exercises ARE auto-checked (simple output/behavior matching) so the kid gets an immediate "yep, that worked!" without waiting on anyone. Projects are NOT auto-checked for *correctness* — deliberately, because grading a real project well is a hard problem not worth solving for v1 — but do require the code to run cleanly before the self check-in button unlocks.
 
 ## Chapter outline (15 chapters)
 

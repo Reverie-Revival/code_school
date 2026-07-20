@@ -15,3 +15,4 @@
 - [feedback_proactive_docs.md](memory/feedback_proactive_docs.md) — when to flag doc needs
 - [feedback_skill_reminders.md](memory/feedback_skill_reminders.md) — skill registry
 - [feedback_skill_lifecycle.md](memory/feedback_skill_lifecycle.md) — register new skills immediately
+- [feedback_claude_md_staleness.md](memory/feedback_claude_md_staleness.md) — cross-check CLAUDE.md against newer feedback before treating it as final
