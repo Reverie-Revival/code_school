@@ -19,8 +19,11 @@ const outputContent = document.getElementById("output-content");
 const errorsPane = document.getElementById("errors-pane");
 const errorsContent = document.getElementById("errors-content");
 const errorHintText = document.getElementById("error-hint-text");
+const errorHintActions = document.getElementById("error-hint-actions");
 const helpBtn = document.getElementById("help-btn");
 const resetBtn = document.getElementById("reset-btn");
+const helpBtnError = document.getElementById("help-btn-error");
+const resetBtnError = document.getElementById("reset-btn-error");
 const runBtn = document.getElementById("run-btn");
 const prevBtn = document.getElementById("prev-lesson-btn");
 const nextBtn = document.getElementById("next-lesson-btn");
@@ -38,6 +41,13 @@ let completedLessons = new Set(); // same Set as completedByChapter.get(chapter.
 let projectDoneByChapter = new Map(); // chapter.number -> true, once the kid has self-marked its Project done
 let projectRanCleanly = false; // whether the current Project's code has run with no error since last entering this page
 let preHelpCode = null; // snapshot of code-input right before Help overwrote it, or null if unused
+
+// The active lesson object, or null on the Welcome/Project pages where
+// `chapter.lessons[currentIndex]` wouldn't make sense.
+function currentLesson() {
+  if (currentIndex === WELCOME || currentIndex === PROJECT) return null;
+  return chapter.lessons[currentIndex];
+}
 
 function completedFor(chapterMeta) {
   if (!completedByChapter.has(chapterMeta.number)) {
@@ -236,6 +246,7 @@ async function runCurrentCode() {
   errorsContent.textContent = "";
   errorHintText.textContent = "";
   errorsPane.hidden = true;
+  errorHintActions.hidden = true;
   practiceFeedback.hidden = true;
   practiceFeedback.className = "practice-feedback";
   practiceFeedbackActions.hidden = true;
@@ -245,11 +256,17 @@ async function runCurrentCode() {
     await pyodide.runPythonAsync(`
 import io, contextlib
 
+def _browser_input(prompt=""):
+    answer = _browser_prompt(prompt)
+    if answer is None:
+        raise EOFError("EOF when reading a line")
+    return answer
+
 _buf = io.StringIO()
 _error = None
 try:
     with contextlib.redirect_stdout(_buf):
-        exec(__user_code, {})
+        exec(__user_code, {"input": _browser_input})
 except Exception as e:
     _error = f"{type(e).__name__}: {e}"
 _output = _buf.getvalue()
@@ -264,6 +281,11 @@ _output = _buf.getvalue()
       errorsContent.textContent = error;
       errorHintText.textContent = getErrorHint(error);
       errorsPane.hidden = false;
+      // An error means there's no output to show pass/fail feedback next to,
+      // so put Help/Reset here instead — otherwise a lesson that errors out
+      // (e.g. a SyntaxError) leaves a stuck kid with no way to get help.
+      const lesson = currentLesson();
+      errorHintActions.hidden = !(lesson && lesson.practice && lesson.practice.solution);
     } else {
       // Every successful run doubles as a practice check when the lesson
       // has one — not graded/punitive, just tells the kid whether this run
@@ -282,6 +304,8 @@ _output = _buf.getvalue()
     errorsContent.textContent = `Something went wrong running your code: ${err}`;
     errorHintText.textContent = getErrorHint(String(err));
     errorsPane.hidden = false;
+    const lesson = currentLesson();
+    errorHintActions.hidden = !(lesson && lesson.practice && lesson.practice.solution);
     if (currentIndex === PROJECT) {
       projectRanCleanly = false;
       updateProjectDoneButton();
@@ -294,6 +318,8 @@ _output = _buf.getvalue()
 function resetHelpState() {
   preHelpCode = null;
   resetBtn.disabled = true;
+  resetBtnError.disabled = true;
+  errorHintActions.hidden = true;
 }
 
 async function checkPractice() {
@@ -338,11 +364,9 @@ async function recordCompletion(lessonNumber) {
   }
 }
 
-runBtn.addEventListener("click", runCurrentCode);
-helpBtn.addEventListener("click", () => {
-  if (currentIndex === WELCOME || currentIndex === PROJECT) return;
-  const lesson = chapter.lessons[currentIndex];
-  if (!lesson.practice || !lesson.practice.solution) return;
+function applyHelp() {
+  const lesson = currentLesson();
+  if (!lesson || !lesson.practice || !lesson.practice.solution) return;
 
   // Only snapshot the first time Help is pressed for this lesson, so a
   // second press doesn't overwrite the snapshot with the already-helped
@@ -350,14 +374,22 @@ helpBtn.addEventListener("click", () => {
   if (preHelpCode === null) {
     preHelpCode = codeInput.value;
     resetBtn.disabled = false;
+    resetBtnError.disabled = false;
   }
   codeInput.value = lesson.practice.solution;
-});
-resetBtn.addEventListener("click", () => {
+}
+
+function applyReset() {
   if (preHelpCode === null) return;
   codeInput.value = preHelpCode;
   resetHelpState();
-});
+}
+
+runBtn.addEventListener("click", runCurrentCode);
+helpBtn.addEventListener("click", applyHelp);
+helpBtnError.addEventListener("click", applyHelp);
+resetBtn.addEventListener("click", applyReset);
+resetBtnError.addEventListener("click", applyReset);
 prevBtn.addEventListener("click", () => {
   if (currentIndex === WELCOME) return;
   if (currentIndex === PROJECT) {
@@ -514,6 +546,12 @@ export async function startApp(profile) {
   runBtn.disabled = true;
 
   pyodide = await loadPyodide();
+  // input() has no stdin to read from otherwise (it'd throw an OSError).
+  // Bridge it to the browser's native prompt() instead — runCurrentCode
+  // shadows the input() builtin with a wrapper that calls this, passing the
+  // prompt text straight into the dialog rather than letting it leak into
+  // the captured Output (which is what Python's own input() would do).
+  pyodide.globals.set("_browser_prompt", (promptText) => window.prompt(promptText));
 
   outputContent.textContent = "Ready! Press Run to try the code.";
   runBtn.disabled = false;

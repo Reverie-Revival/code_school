@@ -27,6 +27,10 @@ const HINTS = [
     match: /^TypeError/i,
     hint: "This is a TypeError — you're combining things Python can't mix directly, like text and a number, without converting one first.",
   },
+  {
+    match: /^EOFError/i,
+    hint: "This means the input box popped up and got closed (or Cancel got clicked) before anything was typed into it. Press Run again, and type an answer into the popup this time before pressing OK.",
+  },
 ];
 
 const FALLBACK_HINT =

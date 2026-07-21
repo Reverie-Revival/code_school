@@ -387,7 +387,20 @@ body {
   flex-wrap: wrap;
   gap: 0.4rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  position: sticky;
+  top: -1rem;
+  z-index: 2;
+  margin: -1rem -1.25rem 0.5rem;
+  padding: 1rem 1.25rem 0.5rem;
+  background: var(--bg-pane);
+}
+
+.lesson-pane .pane-header {
+  background: var(--bg);
+}
+
+.errors-pane .pane-header {
+  background: #fbe9e7;
 }
 
 #lesson-step-label {
@@ -528,6 +541,32 @@ body {
 }
 
 .practice-feedback-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.error-hint-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.error-hint-actions button {
+  background: transparent;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+
+.error-hint-actions button:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.error-hint-actions button:disabled {
   opacity: 0.4;
   cursor: default;
 }
