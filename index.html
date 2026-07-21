@@ -12,7 +12,9 @@
     <p id="lesson-title" hidden>Loading lesson…</p>
     <select id="lesson-select" aria-label="Jump to chapter/lesson" class="header-lesson-select" hidden></select>
     <div id="current-profile-badge" class="current-profile-badge" hidden>
+      <span id="current-profile-avatar" class="current-profile-avatar"></span>
       <span id="current-profile-name"></span>
+      <button id="edit-profile-btn" type="button">Edit</button>
       <button id="switch-profile-btn" type="button">Switch</button>
     </div>
   </header>
@@ -24,19 +26,32 @@
     <button id="add-profile-btn" type="button">+ New Profile</button>
 
     <form id="new-profile-form" class="profile-form" hidden>
+      <h3 id="profile-form-heading">New Profile</h3>
       <label>
         Name
         <input id="new-profile-name" type="text" maxlength="30" required />
       </label>
-      <div class="color-swatches" id="color-swatches"></div>
       <label>
-        PIN (optional, 4 digits)
+        Color
+        <div class="color-swatches" id="color-swatches"></div>
+      </label>
+      <label>
+        Avatar (optional)
+        <div class="avatar-emoji-picker" id="avatar-emoji-picker"></div>
+      </label>
+      <label id="profile-pin-label">
+        PIN (optional, 4 digits — leave blank for none)
         <input id="new-profile-pin" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" />
+      </label>
+      <label id="remove-pin-label" class="remove-pin-label" hidden>
+        <input id="remove-pin-checkbox" type="checkbox" />
+        Remove PIN
       </label>
       <div class="profile-form-actions">
         <button id="create-profile-btn" type="submit">Create</button>
         <button id="cancel-new-profile-btn" type="button">Cancel</button>
       </div>
+      <button id="delete-profile-btn" type="button" class="delete-profile-btn" hidden>Delete this profile</button>
     </form>
 
     <form id="pin-prompt" class="pin-prompt" hidden>
@@ -47,6 +62,7 @@
         <button id="pin-cancel-btn" type="button">Back</button>
       </div>
       <p id="pin-error" class="pin-error" hidden>Wrong PIN — try again.</p>
+      <button id="pin-forgot-btn" type="button" class="pin-forgot-btn">Forgot your PIN?</button>
     </form>
   </div>
 

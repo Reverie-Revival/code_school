@@ -75,6 +75,19 @@ body {
   max-width: 320px;
 }
 
+.current-profile-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+#edit-profile-btn,
 #switch-profile-btn {
   background: transparent;
   border: 1px solid var(--border);
@@ -113,11 +126,28 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.35rem;
+}
+
+.profile-select-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0.5rem;
+}
+
+.profile-edit-btn {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.15rem;
 }
 
 .profile-avatar {
@@ -155,6 +185,12 @@ body {
   max-width: 320px;
 }
 
+#profile-form-heading {
+  margin: 0;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
 .profile-form label,
 .pin-prompt p {
   display: flex;
@@ -190,6 +226,31 @@ body {
   border-color: var(--text);
 }
 
+.avatar-emoji-picker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.emoji-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--bg-pane);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.emoji-swatch.selected {
+  border-color: var(--text);
+}
+
 .profile-form-actions {
   display: flex;
   justify-content: center;
@@ -220,6 +281,42 @@ body {
   color: var(--error);
   font-size: 0.9rem;
   margin: 0;
+}
+
+.pin-forgot-btn {
+  align-self: center;
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.remove-pin-label {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem !important;
+}
+
+.remove-pin-label input {
+  width: auto;
+}
+
+/* Deliberately understated and set apart from Save/Cancel with extra space
+   above -- deleting a profile wipes that kid's progress and saved code, so
+   it shouldn't be as easy to hit as the everyday actions next to it. */
+.delete-profile-btn {
+  align-self: center;
+  margin-top: 1.25rem;
+  background: none;
+  border: none;
+  color: #a33;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.2rem;
 }
 
 /*
