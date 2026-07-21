@@ -21,7 +21,7 @@ Each chapter follows the same rhythm: **Lesson → Practice → Project → Self
 
 ## Current phase
 
-Chapters 1–2 ("Hello, Python" and "Variables") are fully working end-to-end and live: profile picker, multi-chapter navigation, Pyodide code execution, practice auto-checking, and progress saved per profile to Supabase. Chapters 3–15 aren't built yet — see [CLAUDE.md](CLAUDE.md) for the full course outline and [HANDOFF.md](HANDOFF.md) (local only, not committed) for exact next steps.
+All 15 chapters are written and live: profile picker, multi-chapter navigation, Pyodide code execution (including `input()`), practice auto-checking, per-chapter Projects with the self check-in unlock, and progress saved per profile to Supabase. Course content is done — remaining work is James's own QA pass and any polish that surfaces from real use. See [CLAUDE.md](CLAUDE.md) for the full course outline and [HANDOFF.md](HANDOFF.md) (local only, not committed) for exact next steps.
 
 ## Scope
 

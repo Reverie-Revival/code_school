@@ -17,6 +17,8 @@ James's chosen process for this project (see [[project-workflow]]): no GitHub Is
 
 2. **Badge system for profiles**, showing what a kid has completed. Explicitly future/low-priority — James flagged it just so it isn't lost, not because it's needed now (added 2026-07-18).
 
+3. **`input()`'s browser-`prompt()` bridge (added 2026-07-20) may break if this ever becomes an "Add to Home Screen" app.** `window.prompt()` (and `alert()`/`confirm()`) are well-documented as broken/no-ops in iOS Safari's standalone home-screen-icon mode — they work fine in a normal Safari tab, which is how the app runs today (no manifest/`apple-mobile-web-app-capable` tag exists yet). Not an issue right now, but flagging so that if a home-screen icon / PWA-style launch is ever added for the boys' iPads, `input()` needs to be re-verified in that specific mode, since it's a real chapter-5-onward dependency now.
+
 ## Built, awaiting James's QA
 
 Tell James, when he's ready to check these: open the app, and for each item below, do the listed action and confirm the listed result.
