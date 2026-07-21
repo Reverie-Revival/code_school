@@ -21,4 +21,4 @@ James's chosen process for this project (see [[project-workflow]]): no GitHub Is
 
 ## Built, awaiting James's QA
 
-(empty — everything previously here was confirmed good by James on 2026-07-20: sticky lesson-pane header, Help/Reset showing on errors, the Project/self-check-in mechanism, Chapter 3 content + Mad Libs Project, the input()-popup fix (including re-verifying 5.2/5.3/5.4/7.3), and all of Chapters 4–15/the rest of the curriculum. Full 15-chapter course is now complete and QA'd end to end.)
+(empty — everything previously here, including this session's additions below, was confirmed good by James and pushed to `origin/main` / live on GitHub Pages on 2026-07-21: per-lesson/Project code persistence (`saved_code` table, debounced save, flushed on navigation/profile-switch/tab-close), profile editing (name/color/avatar/PIN, reachable from a card's Edit link or the in-lesson header), emoji avatars — including robot/shark/football per request, deliberately *not* an actual NFL Vikings logo due to trademark/copyright risk in a public repo — profile deletion with PIN confirmation, and a "Forgot your PIN?" shortcut into the Edit form.)
