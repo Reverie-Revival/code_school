@@ -1,5 +1,5 @@
 import { fetchProfiles, createProfile, AVATAR_COLORS } from "./profiles.js";
-import { startApp } from "./app.js";
+import { startApp, flushSavedCode } from "./app.js";
 
 const profilePicker = document.getElementById("profile-picker");
 const profileList = document.getElementById("profile-list");
@@ -145,7 +145,11 @@ pinCancelBtn.addEventListener("click", () => {
   showPickerView("list");
 });
 
-switchProfileBtn.addEventListener("click", () => {
+switchProfileBtn.addEventListener("click", async () => {
+  // Flush any pending debounced code save first -- otherwise a reload right
+  // after typing (before the debounce timer fires) silently drops the last
+  // few keystrokes.
+  await flushSavedCode();
   // Full reload is the simplest correct reset: clears Pyodide/lesson state
   // and returns to the picker, same as picking a different save file.
   location.reload();

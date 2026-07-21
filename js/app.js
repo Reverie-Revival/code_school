@@ -1,5 +1,6 @@
 import { chapters } from "../curriculum/python/chapters/index.js";
 import { fetchProgress, markLessonComplete, markProjectDone } from "./progress.js";
+import { fetchSavedCode, saveCode } from "./savedCode.js";
 import { getErrorHint } from "./errorHints.js";
 
 const WELCOME = "welcome"; // currentIndex sentinel for the chapter welcome page
@@ -41,6 +42,50 @@ let completedLessons = new Set(); // same Set as completedByChapter.get(chapter.
 let projectDoneByChapter = new Map(); // chapter.number -> true, once the kid has self-marked its Project done
 let projectRanCleanly = false; // whether the current Project's code has run with no error since last entering this page
 let preHelpCode = null; // snapshot of code-input right before Help overwrote it, or null if unused
+let savedCodeByKey = new Map(); // `${chapterNumber}:${lessonNumber ?? "project"}` -> last-saved code string
+let saveCodeTimer = null; // debounce handle for saving as-you-type edits
+
+// Storage key for the code currently on screen -- lessonNumber is 1-based
+// (matching `progress`/`saved_code`'s convention), or null for a Project.
+function savedCodeKey(chapterNumber, lessonNumber) {
+  return `${chapterNumber}:${lessonNumber === null ? "project" : lessonNumber}`;
+}
+
+// The save key for whatever's currently on screen, or null on the Welcome
+// page (its code box isn't editable, so there's nothing to save).
+function currentSaveKey() {
+  if (currentIndex === WELCOME) return null;
+  return savedCodeKey(chapter.number, currentIndex === PROJECT ? null : currentIndex + 1);
+}
+
+// Debounced save, called as the kid types -- keeps writes off the network on
+// every keystroke while still capturing edits fairly quickly.
+function scheduleSaveCode() {
+  if (!currentSaveKey()) return;
+  clearTimeout(saveCodeTimer);
+  saveCodeTimer = setTimeout(flushSaveCode, 800);
+}
+
+// Save immediately -- call before navigating away from a lesson/project so a
+// debounce window in flight isn't lost. Returns the in-flight save promise
+// (or undefined if there was nothing to save) so callers that are about to
+// tear down the page (e.g. a reload) can await it first.
+function flushSaveCode() {
+  clearTimeout(saveCodeTimer);
+  saveCodeTimer = null;
+  const key = currentSaveKey();
+  if (!key) return undefined;
+
+  const code = codeInput.value;
+  if (savedCodeByKey.get(key) === code) return undefined; // nothing changed since last save
+
+  savedCodeByKey.set(key, code);
+  const lessonNumber = currentIndex === PROJECT ? null : currentIndex + 1;
+  return saveCode({ profileId: currentProfile.id, chapterNumber: chapter.number, lessonNumber, code }).catch((err) => {
+    // Low-stakes: a failed save shouldn't interrupt the kid's flow.
+    console.warn("Couldn't save code:", err);
+  });
+}
 
 // The active lesson object, or null on the Welcome/Project pages where
 // `chapter.lessons[currentIndex]` wouldn't make sense.
@@ -102,7 +147,7 @@ function renderLesson() {
   lessonStepLabel.textContent = `Lesson ${lesson.id}${completedLessons.has(lessonNumber) ? " ✓" : ""}`;
   renderLessonSelect();
   lessonContent.innerHTML = lesson.content;
-  codeInput.value = lesson.starterCode;
+  codeInput.value = savedCodeByKey.get(savedCodeKey(chapter.number, lessonNumber)) ?? lesson.starterCode;
   outputContent.textContent = "";
   errorsContent.textContent = "";
   errorsPane.hidden = true;
@@ -160,7 +205,7 @@ function renderProject() {
   lessonTitle.textContent = `Chapter ${chapter.number}: ${chapter.title} — Project: ${project.title}`;
   renderLessonSelect();
   lessonContent.innerHTML = project.content;
-  codeInput.value = project.starterCode;
+  codeInput.value = savedCodeByKey.get(savedCodeKey(chapter.number, null)) ?? project.starterCode;
   outputContent.textContent = "";
   errorsContent.textContent = "";
   errorsPane.hidden = true;
@@ -377,20 +422,31 @@ function applyHelp() {
     resetBtnError.disabled = false;
   }
   codeInput.value = lesson.practice.solution;
+  scheduleSaveCode();
 }
 
 function applyReset() {
   if (preHelpCode === null) return;
   codeInput.value = preHelpCode;
   resetHelpState();
+  scheduleSaveCode();
 }
 
+codeInput.addEventListener("input", scheduleSaveCode);
+// Covers a browser refresh/tab-close, or the OS killing a backgrounded tab —
+// cases with no button click to hang a flushSaveCode() call off of. Not
+// airtight (the request can be cut off mid-flight if the page closes fast
+// enough), but it turns "lost the last few keystrokes" into a rare edge case
+// instead of the norm.
+window.addEventListener("beforeunload", flushSaveCode);
+window.addEventListener("pagehide", flushSaveCode);
 runBtn.addEventListener("click", runCurrentCode);
 helpBtn.addEventListener("click", applyHelp);
 helpBtnError.addEventListener("click", applyHelp);
 resetBtn.addEventListener("click", applyReset);
 resetBtnError.addEventListener("click", applyReset);
 prevBtn.addEventListener("click", () => {
+  flushSaveCode();
   if (currentIndex === WELCOME) return;
   if (currentIndex === PROJECT) {
     currentIndex = chapter.lessons.length - 1;
@@ -401,6 +457,7 @@ prevBtn.addEventListener("click", () => {
   renderLesson();
 });
 nextBtn.addEventListener("click", async () => {
+  flushSaveCode();
   if (currentIndex === WELCOME) {
     currentIndex = 0;
     renderLesson();
@@ -444,6 +501,7 @@ nextBtn.addEventListener("click", async () => {
   renderLesson();
 });
 lessonSelect.addEventListener("change", () => {
+  flushSaveCode();
   const [chapterIdxStr, sel] = lessonSelect.value.split(":");
   const chapterIdx = Number(chapterIdxStr);
 
@@ -498,6 +556,13 @@ projectDoneBtn.addEventListener("click", async () => {
   }
 });
 
+// Exposed so callers outside this module (e.g. main.js's "Switch Profile"
+// button, which does a full page reload) can flush a pending debounced save
+// before that happens.
+export async function flushSavedCode() {
+  await flushSaveCode();
+}
+
 export async function startApp(profile) {
   currentProfile = profile;
   lessonTitle.hidden = false;
@@ -520,6 +585,16 @@ export async function startApp(profile) {
     });
   } catch (err) {
     console.warn("Couldn't load progress:", err);
+  }
+
+  savedCodeByKey = new Map();
+  try {
+    const rows = await fetchSavedCode(currentProfile.id);
+    rows.forEach((row) => {
+      savedCodeByKey.set(savedCodeKey(row.chapter_number, row.lesson_number), row.code);
+    });
+  } catch (err) {
+    console.warn("Couldn't load saved code:", err);
   }
 
   // Resume at the first chapter that isn't fully complete, defaulting to
