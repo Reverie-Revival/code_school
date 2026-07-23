@@ -80,6 +80,14 @@
       <div class="pane-header">
         <span id="lesson-step-label">Lesson</span>
         <div class="lesson-nav">
+          <button
+            id="lesson-expand-btn"
+            type="button"
+            class="icon-toggle-btn expand-btn"
+            title="Expand this section"
+            aria-label="Expand Lesson section"
+            aria-pressed="false"
+          >⤢</button>
           <button id="prev-lesson-btn" type="button">&larr; Prev</button>
           <button id="next-lesson-btn" type="button">Next &rarr;</button>
         </div>
@@ -100,15 +108,44 @@
 
     <section class="pane editor-pane" aria-label="Code editor">
       <div class="pane-header">
-        <span>Your Code</span>
+        <div class="pane-header-left">
+          <span>Your Code</span>
+          <button
+            id="line-numbers-toggle"
+            type="button"
+            class="icon-toggle-btn"
+            title="Show line numbers"
+            aria-label="Toggle line numbers"
+            aria-pressed="false"
+          >#</button>
+          <button
+            id="editor-expand-btn"
+            type="button"
+            class="icon-toggle-btn expand-btn"
+            title="Expand this section"
+            aria-label="Expand Your Code section"
+            aria-pressed="false"
+          >⤢</button>
+        </div>
         <button id="run-btn" type="button">Run ▶</button>
       </div>
-      <textarea id="code-input" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+      <div class="code-editor-wrap" id="code-editor-wrap">
+        <div id="code-line-numbers" class="code-line-numbers" aria-hidden="true">1</div>
+        <textarea id="code-input" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+      </div>
     </section>
 
     <section class="pane output-pane" aria-label="Output">
       <div class="pane-header">
         <span>Output</span>
+        <button
+          id="output-expand-btn"
+          type="button"
+          class="icon-toggle-btn expand-btn"
+          title="Expand this section"
+          aria-label="Expand Output section"
+          aria-pressed="false"
+        >⤢</button>
       </div>
       <pre id="output-content"></pre>
       <div id="practice-feedback" class="practice-feedback" hidden>
