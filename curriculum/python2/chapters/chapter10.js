@@ -21,9 +21,14 @@ export const chapter = {
       id: "10.1",
       title: "Sharing Behavior: Inheritance",
       content: `
-        <p>A class can inherit from another class by putting the parent class's name in
-        parentheses: <code>class Child(Parent):</code>. The child automatically gets every
-        attribute and method the parent has, without rewriting any of it.</p>
+        <p>A goblin and a dragon are both still "an enemy" — they should both have a name, both be
+        fightable, both follow the same basic shape. Writing that shared shape twice (or three
+        times, or ten) would mean fixing the same bug in multiple places later.
+        <strong>Inheritance</strong> lets one class share its attributes and methods with another,
+        so the shared parts only need to be written once. A class can inherit from another class
+        by putting the parent class's name in parentheses: <code>class Child(Parent):</code>. The
+        child automatically gets every attribute and method the parent has, without rewriting any
+        of it.</p>
         <div class="lesson-example">
           <span class="lesson-label">Example</span>
           <pre><code>class Animal:
@@ -95,9 +100,12 @@ fang.speak()`,
       id: "10.2",
       title: "Overriding a Method",
       content: `
-        <p>A subclass can <strong>override</strong> a method by defining its own version with the
-        same name — Python uses the subclass's version instead of the parent's, for objects of
-        that subclass.</p>
+        <p>Inheritance shares behavior, but a goblin and a dragon obviously shouldn't fight in
+        exactly the same way — sharing everything identically defeats the purpose of having
+        different enemy types at all. A subclass can <strong>override</strong> a method by
+        defining its own version with the same name — Python uses the subclass's version instead
+        of the parent's, for objects of that subclass, while everything else it didn't override
+        still comes from the parent as normal.</p>
         <div class="lesson-example">
           <span class="lesson-label">Example</span>
           <pre><code>class Animal:
@@ -120,9 +128,8 @@ rex.speak()</code></pre>
         <div class="lesson-tip">
           <span class="lesson-label">Watch Out For</span>
           <p>overriding <code>__init__</code> itself (not just a regular method) needs
-          <code>super().__init__(...)</code> to still run the parent's setup — skip it, and the
-          parent's attributes never get created. You won't need this in this course's project, but
-          it's worth knowing the name for later.</p>
+          <code>super().__init__(...)</code> to still run the parent's setup — the next lesson
+          covers exactly that.</p>
         </div>
         <div class="lesson-turn">
           <span class="lesson-label">Your Turn</span>
@@ -170,10 +177,96 @@ whiskers.speak()`,
     },
     {
       id: "10.3",
+      title: "Adding to a Method with super()",
+      content: `
+        <p>Sometimes you don't want to fully replace a parent's method — you want to run the
+        parent's version <em>and then</em> add something extra. <code>super()</code> gives you
+        access to the parent class from inside a subclass, so you can call its original method
+        before (or after) your own additions.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>class Creature:
+    def __init__(self, name):
+        self.name = name
+        self.hp = 10
+
+class Dragon(Creature):
+    def __init__(self, name):
+        super().__init__(name)
+        self.hp = 30
+        self.can_fly = True
+
+smaug = Dragon("Smaug")
+print(smaug.name)
+print(smaug.hp)
+print(smaug.can_fly)</code></pre>
+          <p>Output: <code>Smaug</code>, then <code>30</code>, then <code>True</code>.
+          <code>super().__init__(name)</code> runs <code>Creature</code>'s own
+          <code>__init__</code> first (which sets <code>self.name</code> and a starting
+          <code>self.hp</code> of 10) — then <code>Dragon</code>'s own code overwrites
+          <code>hp</code> to 30 and adds a brand-new attribute, <code>can_fly</code>, that plain
+          <code>Creature</code> objects don't have at all.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p>without calling <code>super().__init__(...)</code>, a subclass that defines its own
+          <code>__init__</code> completely replaces the parent's — none of the parent's setup
+          would run automatically. <code>super()</code> is how you opt back into it.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p>Create a <code>Dragon</code> subclass of the given <code>Creature</code> whose
+          <code>__init__(self, name)</code> calls <code>super().__init__(name)</code>, then sets
+          <code>self.hp = 30</code>. Create one named <code>"Smaug"</code> and print its
+          <code>.name</code> and <code>.hp</code>.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p><code>super().method(...)</code> calls the parent class's version of a method — the
+          way to extend behavior instead of fully replacing it.</p>
+        </div>
+      `,
+      starterCode: `class Creature:
+    def __init__(self, name):
+        self.name = name
+        self.hp = 10
+
+# define Dragon(Creature) whose __init__ calls super().__init__(name), then sets hp to 30
+
+smaug = Dragon("Smaug")
+print(smaug.name)
+print(smaug.hp)`,
+      practice: {
+        instructions: "Print Smaug then 30.",
+        solution: `class Creature:
+    def __init__(self, name):
+        self.name = name
+        self.hp = 10
+
+class Dragon(Creature):
+    def __init__(self, name):
+        super().__init__(name)
+        self.hp = 30
+
+smaug = Dragon("Smaug")
+print(smaug.name)
+print(smaug.hp)`,
+        check(actualOutput) {
+          const lines = actualOutput.trim().split("\n").map((l) => l.trim());
+          if (lines.length === 2 && lines[0] === "Smaug" && lines[1] === "30") {
+            return { pass: true, message: "super().__init__() ran the parent setup, then Dragon added its own." };
+          }
+          return { pass: false, message: "Not quite — we want \"Smaug\" then \"30\"." };
+        },
+      },
+    },
+    {
+      id: "10.4",
       title: "Chapter 10 Wrap-Up",
       content: `
-        <p>Inheritance shares code; overriding customizes exactly the parts that should differ.
-        Time to give your game more than one kind of enemy.</p>
+        <p>Inheritance shares code, overriding customizes exactly the parts that should differ,
+        and <code>super()</code> lets you extend a parent's behavior instead of fully replacing
+        it. Time to give your game more than one kind of enemy.</p>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
           <p>Chapter 10 complete. Next: real enemy classes, each fighting their own way.</p>
@@ -299,7 +392,6 @@ enemies = {
 
 current_room = "cave"
 inventory = []
-tower_visited = False
 
 
 def parse_command(text):
@@ -328,11 +420,6 @@ while True:
                 if destination:
                     current_room = destination
                     print(f"You head {argument}, into the {current_room}.")
-                    if current_room == "tower" and not tower_visited:
-                        tower_visited = True
-                        if random.choice([True, False]):
-                            rooms["tower"].items.append("gem")
-                            print("Something glints on the ground — a gem!")
                 else:
                     print("You can't go that way.")
             else:

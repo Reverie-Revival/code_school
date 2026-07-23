@@ -19,11 +19,64 @@ export const chapter = {
   lessons: [
     {
       id: "11.1",
-      title: "Reading and Writing Text Files",
+      title: "Writing to a Text File",
       content: `
-        <p><code>open(filename, mode)</code> opens a file — <code>"w"</code> for writing (creates
-        or overwrites), <code>"r"</code> for reading. <code>with</code> makes sure the file gets
-        closed automatically when you're done with it, even if something goes wrong.</p>
+        <p>Every variable in every program you've written so far vanishes the moment the program
+        stops — quit the game, and the player's progress is gone. Writing to a file is how a
+        program leaves something behind that's still there the next time it runs.
+        <code>open(filename, "w")</code> opens a file for writing — creating it if it doesn't
+        exist, or erasing and overwriting it if it does. <code>with</code> makes sure the file
+        gets closed automatically once you're done, even if something goes wrong.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>with open("notes.txt", "w") as f:
+    f.write("Hello, file!")
+    f.write(" More text.")</code></pre>
+          <p>This creates <code>notes.txt</code> containing <code>Hello, file! More text.</code>
+          — <code>.write()</code> doesn't add a newline automatically the way <code>print()</code>
+          does, so multiple writes land right next to each other unless you add
+          <code>"\\n"</code> yourself.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p>opening a file with <code>"w"</code> <strong>erases</strong> whatever was already in
+          it before writing anything new — use <code>"a"</code> (append) instead if you want to
+          add on without erasing what's there.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p>Write <code>"Adventure awaits!"</code> to a file called <code>"story.txt"</code>,
+          then print <code>"Saved!"</code> to confirm it ran.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p><code>with open(filename, "w") as f: f.write(text)</code> — the standard shape for
+          saving text to a file.</p>
+        </div>
+      `,
+      starterCode: `# write "Adventure awaits!" to story.txt, then print "Saved!"`,
+      practice: {
+        instructions: "Print exactly: Saved!",
+        solution: `with open("story.txt", "w") as f:
+    f.write("Adventure awaits!")
+print("Saved!")`,
+        check(actualOutput) {
+          const got = actualOutput.trim();
+          if (got === "Saved!") {
+            return { pass: true, message: "Wrote to the file and confirmed it ran." };
+          }
+          return { pass: false, message: 'Not quite — write to story.txt, then print exactly "Saved!"' };
+        },
+      },
+    },
+    {
+      id: "11.2",
+      title: "Reading from a Text File",
+      content: `
+        <p>Writing to a file is only half the round trip — a save file is useless if nothing can
+        load it back. <code>open(filename, "r")</code> opens a file for reading.
+        <code>.read()</code> gets the whole file's contents back as one string, exactly as it was
+        written.</p>
         <div class="lesson-example">
           <span class="lesson-label">Example</span>
           <pre><code>with open("notes.txt", "w") as f:
@@ -32,27 +85,32 @@ export const chapter = {
 with open("notes.txt", "r") as f:
     contents = f.read()
     print(contents)</code></pre>
-          <p>Output: <code>Hello, file!</code> — written to the file in the first block, read back
-          in the second. Each <code>with</code> block closes the file automatically once its
-          indented code finishes.</p>
+          <p>Output: <code>Hello, file!</code> — written in the first block, read back in the
+          second. Each <code>with</code> block opens and closes its own file, so writing and
+          reading are two completely separate steps.</p>
         </div>
         <div class="lesson-tip">
           <span class="lesson-label">Watch Out For</span>
-          <p>opening a file with <code>"w"</code> <strong>erases</strong> whatever was already in
-          it — use <code>"a"</code> (append) instead if you want to add on without erasing.</p>
+          <p>trying to <code>open(filename, "r")</code> a file that doesn't exist yet raises a
+          <code>FileNotFoundError</code> — you'll see exactly this pattern handled with
+          <code>try</code>/<code>except</code> in this chapter's Project, for a save file that
+          might not exist on a player's first run.</p>
         </div>
         <div class="lesson-turn">
           <span class="lesson-label">Your Turn</span>
-          <p>Write <code>"Adventure awaits!"</code> to a file called <code>"story.txt"</code>,
-          then open it again and print its contents.</p>
+          <p><code>story.txt</code> already contains <code>"Adventure awaits!"</code> (from the
+          last lesson). Open it for reading and print its contents.</p>
         </div>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
-          <p><code>with open(filename, "w") as f: f.write(...)</code> to save,
-          <code>with open(filename, "r") as f: f.read()</code> to load it back.</p>
+          <p><code>with open(filename, "r") as f: f.read()</code> — the standard shape for loading
+          text back out of a file.</p>
         </div>
       `,
-      starterCode: `# write "Adventure awaits!" to story.txt, then read and print it back`,
+      starterCode: `with open("story.txt", "w") as f:
+    f.write("Adventure awaits!")
+
+# open story.txt for reading and print its contents`,
       practice: {
         instructions: "Print exactly: Adventure awaits!",
         solution: `with open("story.txt", "w") as f:
@@ -64,20 +122,20 @@ with open("story.txt", "r") as f:
         check(actualOutput) {
           const got = actualOutput.trim();
           if (got === "Adventure awaits!") {
-            return { pass: true, message: "Wrote to a file, then read the same text back out of it." };
+            return { pass: true, message: "Read the file's contents back out correctly." };
           }
-          return { pass: false, message: 'Not quite — write "Adventure awaits!" to story.txt, then read and print it.' };
+          return { pass: false, message: 'Not quite — we want exactly "Adventure awaits!" printed.' };
         },
       },
     },
     {
-      id: "11.2",
+      id: "11.3",
       title: "Saving Structured Data with JSON",
       content: `
         <p>Text files are fine for plain text, but a dictionary or list needs
         <strong>JSON</strong> — a text format that can represent nested data. The
-        <code>json</code> module converts between Python data and JSON text:
-        <code>json.dump()</code> writes, <code>json.load()</code> reads.</p>
+        <code>json</code> module's <code>json.dump(data, f)</code> writes any JSON-compatible
+        Python data straight to a file.</p>
         <div class="lesson-example">
           <span class="lesson-label">Example</span>
           <pre><code>import json
@@ -87,40 +145,101 @@ player = {"name": "Robin", "hp": 40, "items": ["torch", "coin"]}
 with open("save.json", "w") as f:
     json.dump(player, f)
 
-with open("save.json", "r") as f:
-    loaded = json.load(f)
-    print(loaded["name"])
-    print(loaded["items"])</code></pre>
-          <p>Output: <code>Robin</code>, then <code>['torch', 'coin']</code>. The whole nested
-          dictionary survives the round trip through the file — exactly the structure it was
-          saved with.</p>
+print("Saved!")</code></pre>
+          <p>Output: <code>Saved!</code> — but the real result is the file itself:
+          <code>save.json</code> now contains the whole nested dictionary, written out as JSON
+          text. <code>json.dump()</code> takes the data <em>and</em> the open file, in that
+          order.</p>
         </div>
         <div class="lesson-tip">
           <span class="lesson-label">Watch Out For</span>
-          <p><code>json.dump(data, f)</code> takes the data <em>and</em> the open file — a common
-          mistake is calling it like <code>json.dump(data)</code> and forgetting the file, or
-          mixing up the argument order.</p>
+          <p>only JSON-compatible types can be saved this way — dictionaries, lists, strings,
+          numbers, <code>True</code>/<code>False</code>, and <code>None</code>. A custom class
+          object can't be saved directly (Chapter 11's Project deals with exactly this).</p>
         </div>
         <div class="lesson-turn">
           <span class="lesson-label">Your Turn</span>
           <p>Import <code>json</code>. Save the given <code>game_state</code> dictionary to
-          <code>"save.json"</code>, then load it back into a new variable and print its
-          <code>"room"</code> value.</p>
+          <code>"save.json"</code>, then print <code>"Saved!"</code>.</p>
         </div>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
-          <p><code>json.dump(data, f)</code> saves nested Python data to a file;
-          <code>json.load(f)</code> loads it back exactly as it was.</p>
+          <p><code>json.dump(data, f)</code> saves nested Python data to a file, preserving its
+          full structure.</p>
         </div>
       `,
       starterCode: `game_state = {"room": "forest", "gold": 15}
-# import json, save game_state to save.json, load it back, print loaded["room"]`,
+# import json, save game_state to save.json, then print "Saved!"`,
+      practice: {
+        instructions: "Print exactly: Saved!",
+        solution: `import json
+
+game_state = {"room": "forest", "gold": 15}
+
+with open("save.json", "w") as f:
+    json.dump(game_state, f)
+print("Saved!")`,
+        check(actualOutput) {
+          const got = actualOutput.trim();
+          if (got === "Saved!") {
+            return { pass: true, message: "Saved a nested dictionary to a JSON file." };
+          }
+          return { pass: false, message: 'Not quite — save game_state to save.json, then print exactly "Saved!"' };
+        },
+      },
+    },
+    {
+      id: "11.4",
+      title: "Loading Structured Data with JSON",
+      content: `
+        <p><code>json.load(f)</code> is the reverse of <code>json.dump()</code> — it reads a JSON
+        file back into real Python data, exactly the structure it was saved with.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>import json
+
+player = {"name": "Robin", "items": ["torch", "coin"]}
+with open("save.json", "w") as f:
+    json.dump(player, f)
+
+with open("save.json", "r") as f:
+    loaded = json.load(f)
+    print(loaded["name"])
+    print(loaded["items"])</code></pre>
+          <p>Output: <code>Robin</code>, then <code>['torch', 'coin']</code>. <code>loaded</code>
+          is a real Python dictionary again, not just text — you can index into it, loop over it,
+          anything you'd do with a dictionary built directly in code.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p>trying to <code>json.load()</code> a file that isn't valid JSON (or doesn't exist)
+          raises an error — always expect to wrap this in
+          <code>try</code>/<code>except</code> in real code, exactly like this chapter's Project
+          does.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p><code>save.json</code> already contains <code>{"room": "forest", "gold": 15}</code>
+          (from the last lesson). Load it back and print its <code>"room"</code> value.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p><code>json.load(f)</code> loads a JSON file back into real Python data — the natural
+          partner to <code>json.dump()</code>.</p>
+        </div>
+      `,
+      starterCode: `import json
+
+game_state = {"room": "forest", "gold": 15}
+with open("save.json", "w") as f:
+    json.dump(game_state, f)
+
+# open save.json, load it back, print loaded["room"]`,
       practice: {
         instructions: "Print exactly: forest",
         solution: `import json
 
 game_state = {"room": "forest", "gold": 15}
-
 with open("save.json", "w") as f:
     json.dump(game_state, f)
 
@@ -137,11 +256,11 @@ with open("save.json", "r") as f:
       },
     },
     {
-      id: "11.3",
+      id: "11.5",
       title: "Chapter 11 Wrap-Up",
       content: `
         <p>Text files remember simple strings; JSON remembers whole nested structures — exactly
-        what a save file needs.</p>
+        what a save file needs, and now you know both halves: saving and loading each.</p>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
           <p>Chapter 11 complete. Next: let the player save and load their game.</p>

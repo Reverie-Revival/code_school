@@ -6,8 +6,9 @@ export const chapter = {
   title: "Capstone: Finish the Game",
   welcome: {
     content: `
-      <p><strong>Chapter 13: the capstone.</strong> There's no new Python in this chapter — just
-      one lesson on planning, then the biggest, most open-ended project in either course.</p>
+      <p><strong>Chapter 13: the capstone.</strong> There's no new Python syntax in this chapter —
+      just two short lessons on planning and testing your own work, then the biggest, most
+      open-ended project in either course.</p>
 
       <p>You've built a real game engine over twelve chapters: rooms, movement, an inventory,
       enemies with different behaviors, save/load, error handling that keeps it running, and
@@ -61,6 +62,46 @@ export const chapter = {
       starterCode: `# Jot down your plan here as comments, then press Next for the Project.
 # What are you adding? What existing code will it reuse?
 print("Planning complete!")`,
+      practice: null,
+    },
+    {
+      id: "13.2",
+      title: "Testing As You Go",
+      content: `
+        <p>Chapter 12 was about finding bugs after the fact. On a project this size, the better
+        habit is not letting them pile up in the first place — test each small piece the moment
+        you write it, before moving on to the next.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example Workflow</span>
+          <ul>
+            <li>Adding a new room? Run the game and <code>go</code> there immediately — don't
+            write three more features first and test everything at once.</li>
+            <li>Adding a new <code>Enemy</code> subclass? Fight it right away and confirm
+            <code>attack()</code> actually behaves differently than the base class before building
+            anything else on top of it.</li>
+            <li>Something not working? Reach for Chapter 12's tools — read the error bottom-up,
+            recognize the error type, add an <code>assert</code> if you catch yourself assuming
+            something's true without checking.</li>
+          </ul>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p>the temptation to write your whole addition before running it even once — the bigger
+          the untested chunk, the harder it is to tell which part of it actually broke.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p>No practice check for this one either — just keep it in mind as you build. Small
+          step, run it, confirm it works, next small step.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p>Test each piece as you add it, not all at once at the end — the single most useful
+          habit for any project bigger than a few lines.</p>
+        </div>
+      `,
+      starterCode: `# Nothing to fix here — press Next for the Project.
+print("Ready to build!")`,
       practice: null,
     },
   ],

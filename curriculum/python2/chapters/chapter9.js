@@ -84,12 +84,82 @@ print(sword.weight)`,
     },
     {
       id: "9.2",
-      title: "Writing __init__ and Methods",
+      title: "Writing __init__",
       content: `
         <p>Setting attributes one by one after creating an object (like last lesson) works, but
-        it's clunky. <code>__init__</code> is a special method that runs automatically when an
-        object is created, so you can set everything up in one step. <code>self</code> refers to
-        the specific object being built or used.</p>
+        it's clunky and easy to forget a step. <code>__init__</code> is a special method that runs
+        automatically the moment an object is created, so you can set everything up in one place.
+        <code>self</code> refers to the specific object being built.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>class Player:
+    def __init__(self, name, hp):
+        self.name = name
+        self.hp = hp
+
+robin = Player("Robin", 40)
+print(robin.name)
+print(robin.hp)</code></pre>
+          <p>Output: <code>Robin</code>, then <code>40</code>. <code>Player("Robin", 40)</code>
+          calls <code>__init__</code> automatically, with <code>self</code> bound to the new
+          object — you never pass <code>self</code> yourself, Python does that for you. The two
+          arguments you <em>do</em> pass, <code>"Robin"</code> and <code>40</code>, become
+          <code>name</code> and <code>hp</code> inside <code>__init__</code>, which then get
+          stored onto <code>self</code>.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p><code>__init__</code> needs <code>self</code> as its first parameter, even though you
+          never pass it explicitly when calling <code>Player(...)</code> — leave it off and you'll
+          get a confusing <code>TypeError</code> about the wrong number of arguments.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p>Write a class <code>Item</code> with <code>__init__(self, name, weight)</code> that
+          stores both onto <code>self</code>. Create a sword named <code>"Iron Sword"</code>
+          weighing <code>8</code>, then print <code>sword.name</code> and
+          <code>sword.weight</code>.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p><code>__init__</code> runs automatically when an object is created, setting up its
+          attributes in one place instead of one at a time from outside.</p>
+        </div>
+      `,
+      starterCode: `class Item:
+    def __init__(self, name, weight):
+        # your code here
+        pass
+
+sword = Item("Iron Sword", 8)
+print(sword.name)
+print(sword.weight)`,
+      practice: {
+        instructions: "Print Iron Sword then 8.",
+        solution: `class Item:
+    def __init__(self, name, weight):
+        self.name = name
+        self.weight = weight
+
+sword = Item("Iron Sword", 8)
+print(sword.name)
+print(sword.weight)`,
+        check(actualOutput) {
+          const lines = actualOutput.trim().split("\n").map((l) => l.trim());
+          if (lines.length === 2 && lines[0] === "Iron Sword" && lines[1] === "8") {
+            return { pass: true, message: "__init__ set up both attributes automatically." };
+          }
+          return { pass: false, message: 'Not quite — we want "Iron Sword" then "8".' };
+        },
+      },
+    },
+    {
+      id: "9.3",
+      title: "Writing Methods",
+      content: `
+        <p>A <strong>method</strong> is a function that lives inside a class and acts on
+        <code>self</code> — the specific object it was called on. Once an object has data via
+        <code>__init__</code>, methods are how it <em>does</em> things with that data.</p>
         <div class="lesson-example">
           <span class="lesson-label">Example</span>
           <pre><code>class Player:
@@ -103,34 +173,33 @@ print(sword.weight)`,
 robin = Player("Robin", 40)
 robin.take_damage(12)
 print(robin.hp)</code></pre>
-          <p>Output: <code>28</code>. <code>Player("Robin", 40)</code> calls <code>__init__</code>
-          automatically, with <code>self</code> bound to the new object — you never pass
-          <code>self</code> yourself, Python does it for you. <code>take_damage</code> is a
-          <strong>method</strong>: a function that lives inside the class and acts on
-          <code>self</code>.</p>
+          <p>Output: <code>28</code>. Calling <code>robin.take_damage(12)</code> automatically
+          passes <code>robin</code> as <code>self</code> — inside the method,
+          <code>self.hp</code> refers to <em>that specific player's</em> HP, so the change only
+          affects <code>robin</code>, not any other <code>Player</code> object you might create.</p>
         </div>
         <div class="lesson-tip">
           <span class="lesson-label">Watch Out For</span>
-          <p>every method needs <code>self</code> as its first parameter, even ones that don't
-          take any other arguments — leave it off and you'll get a confusing
-          <code>TypeError</code> about the wrong number of arguments.</p>
+          <p>you call a method with <code>robin.take_damage(12)</code>, not
+          <code>Player.take_damage(robin, 12)</code> — the dot-call syntax is what makes Python
+          pass <code>self</code> for you automatically.</p>
         </div>
         <div class="lesson-turn">
           <span class="lesson-label">Your Turn</span>
-          <p>Write a class <code>Item</code> with <code>__init__(self, name, weight)</code> and a
-          method <code>describe(self)</code> that prints <code>f"{self.name} ({self.weight}
-          lbs)"</code>. Create a sword weighing 8 and call <code>.describe()</code> on it.</p>
+          <p>Add a method <code>describe(self)</code> to the given <code>Item</code> class that
+          prints <code>f"{self.name} ({self.weight} lbs)"</code>. Create a sword weighing 8 and
+          call <code>.describe()</code> on it.</p>
         </div>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
-          <p><code>__init__</code> sets up a new object's attributes automatically;
-          <code>self</code> inside any method refers to that specific object.</p>
+          <p>Methods are functions defined inside a class that act on <code>self</code> — calling
+          <code>obj.method(args)</code> automatically passes <code>obj</code> as <code>self</code>.</p>
         </div>
       `,
       starterCode: `class Item:
     def __init__(self, name, weight):
-        # your code here
-        pass
+        self.name = name
+        self.weight = weight
 
     def describe(self):
         # your code here
@@ -153,19 +222,96 @@ sword.describe()`,
         check(actualOutput) {
           const got = actualOutput.trim();
           if (got === "Iron Sword (8 lbs)") {
-            return { pass: true, message: "__init__ set up the object, describe() read from self correctly." };
+            return { pass: true, message: "The method read from self correctly." };
           }
           return { pass: false, message: 'Not quite — we want exactly "Iron Sword (8 lbs)".' };
         },
       },
     },
     {
-      id: "9.3",
+      id: "9.4",
+      title: "Multiple Objects, One Class",
+      content: `
+        <p>The whole point of a class is making more than one object from it — each instance gets
+        its own independent copy of the attributes, even though they all share the same methods
+        defined once on the class.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>class Player:
+    def __init__(self, name, hp):
+        self.name = name
+        self.hp = hp
+
+    def take_damage(self, amount):
+        self.hp = self.hp - amount
+
+robin = Player("Robin", 40)
+sam = Player("Sam", 35)
+robin.take_damage(10)
+print(robin.hp)
+print(sam.hp)</code></pre>
+          <p>Output: <code>30</code>, then <code>35</code>. Only <code>robin</code> took damage —
+          <code>sam</code> is a completely separate object with its own <code>hp</code>, even
+          though both came from the exact same <code>Player</code> class and the exact same
+          <code>take_damage</code> method.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p>it's tempting to think changing one object might somehow affect another "like it" —
+          it never does. Each call to <code>Player(...)</code> creates a fully independent object.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p>Using the given <code>Player</code> class, create <code>robin</code> (hp 40) and
+          <code>sam</code> (hp 35). Have <code>sam</code> take 20 damage. Print both players' hp,
+          <code>robin</code> first.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p>Every object made from a class has its own independent attributes — changing one
+          never affects another, even from the same class.</p>
+        </div>
+      `,
+      starterCode: `class Player:
+    def __init__(self, name, hp):
+        self.name = name
+        self.hp = hp
+
+    def take_damage(self, amount):
+        self.hp = self.hp - amount
+
+# create robin (40) and sam (35), have sam take 20 damage, print both hp values`,
+      practice: {
+        instructions: "Print 40 then 15.",
+        solution: `class Player:
+    def __init__(self, name, hp):
+        self.name = name
+        self.hp = hp
+
+    def take_damage(self, amount):
+        self.hp = self.hp - amount
+
+robin = Player("Robin", 40)
+sam = Player("Sam", 35)
+sam.take_damage(20)
+print(robin.hp)
+print(sam.hp)`,
+        check(actualOutput) {
+          const lines = actualOutput.trim().split("\n").map((l) => l.trim());
+          if (lines.length === 2 && lines[0] === "40" && lines[1] === "15") {
+            return { pass: true, message: "Each object kept its own independent hp." };
+          }
+          return { pass: false, message: "Not quite — robin should stay at 40, sam should drop to 15." };
+        },
+      },
+    },
+    {
+      id: "9.5",
       title: "Chapter 9 Wrap-Up",
       content: `
         <p>Classes bundle data and behavior together — <code>__init__</code> sets an object up,
-        methods act on it through <code>self</code>. This is the architecture shift your whole
-        game is about to go through.</p>
+        methods act on it through <code>self</code>, and every object keeps its own independent
+        copy of the data. This is the architecture shift your whole game is about to go through.</p>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
           <p>Chapter 9 complete. Next: rebuild the game's rooms as a real class.</p>

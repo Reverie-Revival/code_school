@@ -19,58 +19,112 @@ export const chapter = {
   lessons: [
     {
       id: "6.1",
-      title: "Sorting and Searching Lists",
+      title: "Sorting Lists",
       content: `
-        <p><code>sorted(a_list)</code> returns a new, sorted list without changing the original;
-        <code>a_list.sort()</code> sorts the list in place. <code>in</code> checks whether
-        something is present at all.</p>
+        <p>An inventory listed in whatever random order items were picked up in is hard for a
+        player to scan — alphabetical order is what makes a list actually readable at a glance.
+        <code>sorted(a_list)</code> returns a new, sorted list without changing the original;
+        <code>a_list.sort()</code> sorts the list in place, changing it directly.</p>
         <div class="lesson-example">
           <span class="lesson-label">Example</span>
           <pre><code>items = ["shield", "potion", "amulet"]
 print(sorted(items))
 print(items)
-print("potion" in items)</code></pre>
+
+items.sort()
+print(items)</code></pre>
           <p>Output: <code>['amulet', 'potion', 'shield']</code>, then <code>['shield', 'potion',
-          'amulet']</code> (unchanged!), then <code>True</code>. <code>sorted()</code> hands back
-          a brand-new list — the original is untouched.</p>
+          'amulet']</code> (unchanged — <code>sorted()</code> made a new list without touching
+          the original), then <code>['amulet', 'potion', 'shield']</code> (now <code>items</code>
+          itself is sorted, because <code>.sort()</code> changes it directly).</p>
         </div>
         <div class="lesson-tip">
           <span class="lesson-label">Watch Out For</span>
           <p><code>items.sort()</code> returns <code>None</code>, not the sorted list — writing
           <code>items = items.sort()</code> throws away your entire list. If you want to keep
-          using the original variable, either use <code>sorted(items)</code> or call
-          <code>.sort()</code> on its own line.</p>
+          using the original variable name, either use <code>sorted(items)</code> and store the
+          result, or call <code>.sort()</code> on its own line with no assignment.</p>
         </div>
         <div class="lesson-turn">
           <span class="lesson-label">Your Turn</span>
           <p>Given <code>bag = ["sword", "gem", "torch"]</code>, print a sorted <em>copy</em> of
-          the list (leaving <code>bag</code> itself unchanged), then print whether
-          <code>"torch"</code> is in <code>bag</code>.</p>
+          the list (leaving <code>bag</code> itself unchanged).</p>
         </div>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
-          <p><code>sorted(a_list)</code> is non-destructive; <code>a_list.sort()</code> changes it
-          in place and returns nothing useful. <code>in</code> checks membership.</p>
+          <p><code>sorted(a_list)</code> is non-destructive and hands back a new list;
+          <code>a_list.sort()</code> changes it in place and returns nothing useful.</p>
         </div>
       `,
       starterCode: `bag = ["sword", "gem", "torch"]
-# print a sorted copy of bag, then whether "torch" is in bag`,
+# print a sorted copy of bag`,
       practice: {
-        instructions: "Print the sorted list, then True or False for whether torch is in bag.",
+        instructions: "Print the sorted list: ['gem', 'sword', 'torch']",
         solution: `bag = ["sword", "gem", "torch"]
-print(sorted(bag))
-print("torch" in bag)`,
+print(sorted(bag))`,
         check(actualOutput) {
-          const lines = actualOutput.trim().split("\n").map((l) => l.trim().replace(/'/g, '"'));
-          if (lines.length === 2 && lines[0] === '["gem", "sword", "torch"]' && lines[1] === "True") {
-            return { pass: true, message: "Sorted correctly, and confirmed torch is in the bag." };
+          const got = actualOutput.trim().replace(/'/g, '"');
+          if (got === '["gem", "sword", "torch"]') {
+            return { pass: true, message: "Sorted correctly, without disturbing the original list." };
           }
-          return { pass: false, message: "Not quite — we want the sorted list ['gem', 'sword', 'torch'] then True." };
+          return { pass: false, message: "Not quite — we want the sorted list ['gem', 'sword', 'torch']." };
         },
       },
     },
     {
       id: "6.2",
+      title: "Searching Lists",
+      content: `
+        <p>Before you can drop an item or check whether a player already has something, your code
+        needs to answer "is this actually in the list?" — and sometimes, "exactly where?"
+        <code>in</code> checks whether something is present in a list at all, returning
+        <code>True</code> or <code>False</code>. <code>.index()</code> goes further and tells you
+        <em>where</em> — the position of the first match.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>party = ["Robin", "Sam", "Jo"]
+print("Sam" in party)
+print(party.index("Sam"))</code></pre>
+          <p>Output: <code>True</code>, then <code>1</code>. <code>"Sam" in party</code> just
+          answers "is it here?"; <code>party.index("Sam")</code> answers "where, exactly?" — its
+          position, counting from 0.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p><code>.index()</code> crashes with a <code>ValueError</code> if the item isn't in the
+          list at all — always check with <code>in</code> first if you're not sure it's there.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p><code>party = ["Robin", "Sam", "Jo"]</code> is given. Print whether
+          <code>"Max"</code> is in the party, then print <code>Jo</code>'s position using
+          <code>.index()</code>.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p><code>in</code> answers whether something's present; <code>.index()</code> answers
+          where — check with <code>in</code> first if you're not certain <code>.index()</code>
+          would find a match.</p>
+        </div>
+      `,
+      starterCode: `party = ["Robin", "Sam", "Jo"]
+# print whether "Max" is in party, then Jo's index`,
+      practice: {
+        instructions: "Print False then 2.",
+        solution: `party = ["Robin", "Sam", "Jo"]
+print("Max" in party)
+print(party.index("Jo"))`,
+        check(actualOutput) {
+          const lines = actualOutput.trim().split("\n").map((l) => l.trim());
+          if (lines.length === 2 && lines[0] === "False" && lines[1] === "2") {
+            return { pass: true, message: "Checked membership, then found the exact position." };
+          }
+          return { pass: false, message: "Not quite — we want False then 2." };
+        },
+      },
+    },
+    {
+      id: "6.3",
       title: "Tuples: When Not to Use a List",
       content: `
         <p>A <strong>tuple</strong> — written with parentheses, <code>(1, 2, 3)</code> — looks like
@@ -121,7 +175,7 @@ print(f"{name}: {weight} lbs")`,
       },
     },
     {
-      id: "6.3",
+      id: "6.4",
       title: "Chapter 6 Wrap-Up",
       content: `
         <p>Sorting, searching, and tuples for data that shouldn't change — everything an inventory

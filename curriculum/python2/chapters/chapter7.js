@@ -76,6 +76,80 @@ except ValueError:
     },
     {
       id: "7.2",
+      title: "Catching Different Errors Differently",
+      content: `
+        <p>A <code>try</code> can have more than one <code>except</code> block, each catching a
+        different kind of error — Python checks them in order and runs the first one that
+        matches. This lets you respond differently depending on exactly what went wrong.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>items = {"torch": 2}
+name = "sword"
+
+try:
+    weight = items[name]
+    doubled = weight * "x"
+except KeyError:
+    print(f"No item called {name}.")
+except TypeError:
+    print("Can't do that math.")</code></pre>
+          <p>Output: <code>No item called sword.</code> — <code>items["sword"]</code> raises a
+          <code>KeyError</code> (since <code>"sword"</code> isn't in the dictionary), so Python
+          matches the first <code>except</code> and skips the second entirely. If
+          <code>name</code> had been <code>"torch"</code> instead, the <code>KeyError</code>
+          wouldn't happen, but multiplying a number by a string a few lines later would raise a
+          <code>TypeError</code> and match the second block instead.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p>only the <em>first</em> matching <code>except</code> runs — Python doesn't check the
+          rest once it finds a match, the same way <code>elif</code> chains stop at the first
+          <code>True</code> condition.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p>The given code looks up <code>"sword"</code> in <code>prices</code> (which doesn't
+          have that key) and would also crash with a <code>TypeError</code> if the lookup had
+          succeeded. Add two <code>except</code> blocks: one for <code>KeyError</code> printing
+          <code>"Item not found."</code>, one for <code>TypeError</code> printing
+          <code>"Bad price."</code></p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p>Stack multiple <code>except</code> blocks to handle different error types
+          differently — Python runs whichever one matches first.</p>
+        </div>
+      `,
+      starterCode: `prices = {"torch": 5}
+
+try:
+    cost = prices["sword"]
+    total = cost * "oops"
+    print(total)
+# add except KeyError and except TypeError blocks here`,
+      practice: {
+        instructions: "Print exactly: Item not found.",
+        solution: `prices = {"torch": 5}
+
+try:
+    cost = prices["sword"]
+    total = cost * "oops"
+    print(total)
+except KeyError:
+    print("Item not found.")
+except TypeError:
+    print("Bad price.")`,
+        check(actualOutput) {
+          const got = actualOutput.trim();
+          if (got === "Item not found.") {
+            return { pass: true, message: "Matched the KeyError to its own specific message." };
+          }
+          return { pass: false, message: 'Not quite — "sword" isn\'t in prices, so we want exactly "Item not found."' };
+        },
+      },
+    },
+    {
+      id: "7.3",
       title: "Raising Your Own Exceptions",
       content: `
         <p>Python raises built-in errors automatically, but you can also raise your own with
@@ -144,12 +218,12 @@ except ValueError as e:
       },
     },
     {
-      id: "7.3",
+      id: "7.4",
       title: "Chapter 7 Wrap-Up",
       content: `
-        <p><code>try</code>/<code>except</code> catches failures instead of crashing;
-        <code>raise</code> lets you reject bad input on your own terms. Time to make the whole
-        game this sturdy.</p>
+        <p><code>try</code>/<code>except</code> catches failures instead of crashing, multiple
+        <code>except</code> blocks handle different problems differently, and <code>raise</code>
+        lets you reject bad input on your own terms. Time to make the whole game this sturdy.</p>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
           <p>Chapter 7 complete. Next: bulletproof everything you've built so far.</p>
@@ -194,7 +268,7 @@ print("Chapter 7 complete!")`,
         is the right call, not a bare <code>except</code> — it still names <em>which</em> broad
         category it's catching, and it's specifically because this loop is the last line of
         defense for the entire program, not because naming specific errors doesn't matter
-        elsewhere (it still does).</p>
+        elsewhere (it still does, as Chapter 7.2 showed).</p>
       </div>
     `,
     starterCode: `ITEM_DATA = {

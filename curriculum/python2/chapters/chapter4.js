@@ -8,8 +8,8 @@ export const chapter = {
     content: `
       <p><strong>Chapter 4: Nested Data & Comprehensions.</strong> Course 1's lists and
       dictionaries held simple things — numbers, strings. Real data is messier: a dictionary whose
-      values are <em>other</em> dictionaries, a list full of dictionaries, dictionaries full of
-      lists. That's how you'll model an entire game world.</p>
+      values are <em>other</em> dictionaries, a list full of dictionaries, dictionaries built from
+      a single compact line instead of a full loop. That's how you'll model an entire game world.</p>
 
       <p>This chapter's Project — <strong>The World Map</strong> — is where your game stops being
       one room and becomes an actual map: rooms with real exits, connected to each other, that the
@@ -19,11 +19,11 @@ export const chapter = {
   lessons: [
     {
       id: "4.1",
-      title: "Lists of Dicts, Dicts of Dicts",
+      title: "Dicts Inside Dicts",
       content: `
         <p>A dictionary's value can be anything — including another dictionary. Nesting them lets
-        you model something with its own set of properties, like a room with a description
-        <em>and</em> a list of exits <em>and</em> a list of items, all under one name.</p>
+        you model something with several properties at once, like a room with a description
+        <em>and</em> a list of exits, all filed under one name.</p>
         <div class="lesson-example">
           <span class="lesson-label">Example</span>
           <pre><code>rooms = {
@@ -32,9 +32,11 @@ export const chapter = {
 }
 print(rooms["cave"]["description"])
 print(rooms["forest"]["exits"])</code></pre>
-          <p>Output: <code>A damp stone passage.</code>, then <code>['south']</code> — wait,
-          <code>['south']</code> is <em>forest's</em> exits, printed with a second set of square
-          brackets to reach inside the nested dictionary: <code>rooms["forest"]["exits"]</code>.</p>
+          <p>Output: <code>A damp stone passage.</code>, then <code>['south']</code>. Reading it
+          left to right: <code>rooms["forest"]</code> gets forest's whole inner dictionary
+          (<code>{"description": ..., "exits": ["south"]}</code>), and the second
+          <code>["exits"]</code> reaches one step further into <em>that</em> dictionary to get
+          just its exits list.</p>
         </div>
         <div class="lesson-tip">
           <span class="lesson-label">Watch Out For</span>
@@ -77,10 +79,123 @@ print(players["robin"]["hp"])`,
     },
     {
       id: "4.2",
+      title: "Lists of Dicts",
+      content: `
+        <p>The reverse shape — a <em>list</em> where each item is a dictionary — is just as
+        common: think a party of characters, each one a dictionary of their own stats, all held
+        in one list.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>party = [
+    {"name": "Robin", "hp": 40},
+    {"name": "Sam", "hp": 35},
+]
+print(party[0]["name"])
+for member in party:
+    print(f"{member['name']}: {member['hp']} HP")</code></pre>
+          <p>Output: <code>Robin</code>, then <code>Robin: 40 HP</code> and <code>Sam: 35
+          HP</code>. <code>party[0]</code> gets the <em>first dictionary</em> in the list, and
+          then <code>["name"]</code> reaches into it. Looping with <code>for member in
+          party</code> hands you each dictionary in turn, one at a time.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p>inside an f-string, use single quotes for the dictionary key
+          (<code>{member['name']}</code>) since the f-string itself is already wrapped in double
+          quotes — mixing the same quote type in both places would end the string early.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p><code>enemies</code> is a list of two dictionaries, each with <code>"name"</code> and
+          <code>"hp"</code>. Loop over it and print each one as <code>f"{name}: {hp} HP"</code>.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p>A list of dicts is a collection of "things," each with its own properties —
+          <code>list[index]["key"]</code> to grab one directly, or a <code>for</code> loop to walk
+          through all of them.</p>
+        </div>
+      `,
+      starterCode: `enemies = [
+    {"name": "Goblin", "hp": 12},
+    {"name": "Skeleton", "hp": 18},
+]
+# loop over enemies, printing each as "{name}: {hp} HP"`,
+      practice: {
+        instructions: "Print: Goblin: 12 HP then Skeleton: 18 HP",
+        solution: `enemies = [
+    {"name": "Goblin", "hp": 12},
+    {"name": "Skeleton", "hp": 18},
+]
+for enemy in enemies:
+    print(f"{enemy['name']}: {enemy['hp']} HP")`,
+        check(actualOutput) {
+          const lines = actualOutput.trim().split("\n").map((l) => l.trim());
+          if (lines.length === 2 && lines[0] === "Goblin: 12 HP" && lines[1] === "Skeleton: 18 HP") {
+            return { pass: true, message: "Looped through the list, reaching into each dict along the way." };
+          }
+          return { pass: false, message: "Not quite — we want \"Goblin: 12 HP\" then \"Skeleton: 18 HP\"." };
+        },
+      },
+    },
+    {
+      id: "4.3",
       title: "List Comprehensions",
       content: `
         <p>A <strong>list comprehension</strong> builds a new list from an existing one, in one
         line, instead of writing a full <code>for</code> loop with <code>.append()</code>.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>names = ["sword", "gold", "shield"]
+upper_names = [name.upper() for name in names]
+print(upper_names)</code></pre>
+          <p>Output: <code>['SWORD', 'GOLD', 'SHIELD']</code>. Read it left to right: "give me
+          <code>name.upper()</code>, for each <code>name</code> in <code>names</code>." The
+          equivalent loop is three lines (make an empty list, loop, append each result); this is
+          one.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p>a comprehension is for building a <em>new</em> list — if you're not collecting a
+          result (just, say, printing each item), a normal <code>for</code> loop is clearer, and
+          that's completely fine to use instead.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p>Given <code>hp_values = [40, 22, 35]</code>, use a list comprehension to build a new
+          list where each value is doubled, and print it.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p><code>[expression for item in list]</code> transforms every item into something new,
+          collecting the results into a new list, all in one line.</p>
+        </div>
+      `,
+      starterCode: `hp_values = [40, 22, 35]
+# build and print a new list where each value is doubled`,
+      practice: {
+        instructions: "Print exactly: [80, 44, 70]",
+        solution: `hp_values = [40, 22, 35]
+doubled = [hp * 2 for hp in hp_values]
+print(doubled)`,
+        check(actualOutput) {
+          const got = actualOutput.trim();
+          if (got === "[80, 44, 70]") {
+            return { pass: true, message: "Transformed every value in one line." };
+          }
+          return { pass: false, message: "Not quite — we want exactly [80, 44, 70]." };
+        },
+      },
+    },
+    {
+      id: "4.4",
+      title: "List Comprehensions with a Condition",
+      content: `
+        <p>Plenty of real filtering needs — which enemies are still alive, which items are light
+        enough to carry, which rooms have already been visited — boil down to "give me only the
+        ones matching some condition." Add an <code>if</code> to a comprehension to do exactly
+        that: filter which items make it into the new list, so only items where the condition is
+        <code>True</code> get included.</p>
         <div class="lesson-example">
           <span class="lesson-label">Example</span>
           <pre><code>hp_values = [40, 0, 35, 0, 12]
@@ -88,13 +203,15 @@ alive = [hp for hp in hp_values if hp > 0]
 print(alive)</code></pre>
           <p>Output: <code>[40, 35, 12]</code>. Read it left to right: "give me <code>hp</code>,
           for each <code>hp</code> in <code>hp_values</code>, but only if <code>hp > 0</code>."
-          The equivalent loop is four lines; this is one.</p>
+          The <code>if</code> at the end filters — it doesn't transform the value the way the
+          expression at the front does.</p>
         </div>
         <div class="lesson-tip">
           <span class="lesson-label">Watch Out For</span>
-          <p>comprehensions are for building a <em>new</em> list — if you're not collecting a
-          result (just, say, printing each item), a normal <code>for</code> loop is clearer and
-          that's fine.</p>
+          <p>this filtering <code>if</code> (at the end) is a different thing from an
+          <code>if</code>/<code>else</code> used to transform a value (which goes at the
+          <em>front</em>, before the <code>for</code>) — mixing up the two positions is a common
+          source of <code>SyntaxError</code>s when you're first getting used to comprehensions.</p>
         </div>
         <div class="lesson-turn">
           <span class="lesson-label">Your Turn</span>
@@ -104,8 +221,8 @@ print(alive)</code></pre>
         </div>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
-          <p><code>[expression for item in list if condition]</code> — the same shape every time,
-          filtering and building a new list in one line.</p>
+          <p><code>[expression for item in list if condition]</code> — filtering and (optionally)
+          transforming in one line.</p>
         </div>
       `,
       starterCode: `names = ["sword", "gold", "shield", "gem", "potion"]
@@ -126,7 +243,7 @@ print(long_names)`,
       },
     },
     {
-      id: "4.3",
+      id: "4.5",
       title: "Dict Comprehensions",
       content: `
         <p>Same idea, but for dictionaries: <code>{key: value for item in list}</code> builds a
@@ -137,7 +254,9 @@ print(long_names)`,
 prices = {item: len(item) * 2 for item in items}
 print(prices)</code></pre>
           <p>Output: <code>{'sword': 10, 'shield': 12, 'potion': 12}</code> — each item becomes a
-          key, mapped to its own computed value (here, its length times 2).</p>
+          key, mapped to its own computed value (here, its length times 2). It follows exactly the
+          same "expression, for, in" shape as a list comprehension, just with a
+          <code>key: value</code> pair up front instead of a single expression.</p>
         </div>
         <div class="lesson-tip">
           <span class="lesson-label">Watch Out For</span>
@@ -174,11 +293,12 @@ print(visited)`,
       },
     },
     {
-      id: "4.4",
+      id: "4.6",
       title: "Chapter 4 Wrap-Up",
       content: `
-        <p>Nested dictionaries can model something with several properties at once; comprehensions
-        build lists and dictionaries in a single line. Both are exactly what a real game map needs.</p>
+        <p>Nested dictionaries can model something with several properties at once, lists of
+        dicts model a collection of "things," and comprehensions build both in a single line.
+        Exactly what a real game map needs.</p>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
           <p>Chapter 4 complete. Next: turn one room into a real, connected map.</p>
