@@ -84,6 +84,59 @@ print(robin.hp)`,
     },
     {
       id: "12.2",
+      title: "A Field Guide to Common Errors",
+      content: `
+        <p>Recognizing an error type on sight — before even reading the message — speeds up
+        debugging a lot. A quick reference to the ones you'll hit most:</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>NameError    — used a name that doesn't exist (typo, or never defined)
+TypeError    — mixed incompatible types ("2" + 2), or wrong arg count
+IndexError   — list index doesn't exist (list has 3 items, you asked for [5])
+KeyError     — dict key doesn't exist
+AttributeError — object doesn't have that attribute/method
+ValueError   — right type, but an invalid value (int("abc"))</code></pre>
+          <p>Each one narrows down the search immediately. See <code>KeyError</code>? Go check
+          your dictionary's actual keys. See <code>IndexError</code>? Go check the list's actual
+          length. You already know all six of these from earlier chapters — this is just the
+          cheat sheet, all in one place.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p><code>TypeError</code> and <code>ValueError</code> are easy to mix up — a
+          <code>TypeError</code> means the type itself is wrong for the operation (you can't add a
+          string and a number); a <code>ValueError</code> means the type is right but the specific
+          value isn't valid (<code>int("abc")</code> — a string is the right type for
+          <code>int()</code> to accept, but <code>"abc"</code> isn't a valid number).</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p>This code raises a <code>KeyError</code>. Without changing the dictionary, fix the
+          lookup so it prints the actual gold value, <code>15</code>.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p>Recognizing the error type immediately tells you what to check — a name, a type, an
+          index, a key, an attribute, or a value.</p>
+        </div>
+      `,
+      starterCode: `stats = {"hp": 40, "gold": 15}
+print(stats["Gold"])`,
+      practice: {
+        instructions: "Fix the KeyError so this prints exactly: 15",
+        solution: `stats = {"hp": 40, "gold": 15}
+print(stats["gold"])`,
+        check(actualOutput) {
+          const got = actualOutput.trim();
+          if (got === "15") {
+            return { pass: true, message: "Matched the dictionary's actual key casing." };
+          }
+          return { pass: false, message: 'Not quite — the key is "gold" (lowercase), not "Gold". Fix the lookup so it prints 15.' };
+        },
+      },
+    },
+    {
+      id: "12.3",
       title: "Sanity-Checking Your Own Code with assert",
       content: `
         <p><code>assert condition, "message"</code> checks that something you believe to be true
@@ -145,11 +198,12 @@ print(total_gold([10, 25, 5]))`,
       },
     },
     {
-      id: "12.3",
+      id: "12.4",
       title: "Chapter 12 Wrap-Up",
       content: `
-        <p>Read tracebacks bottom-up, and use <code>assert</code> to catch broken assumptions
-        early. Time to put both to work on your own game.</p>
+        <p>Read tracebacks bottom-up, recognize common error types on sight, and use
+        <code>assert</code> to catch broken assumptions early. Time to put all three to work on
+        your own game.</p>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
           <p>Chapter 12 complete. Next: hunt down real bugs in your own accumulated code.</p>
@@ -169,7 +223,7 @@ print("Chapter 12 complete!")`,
       <div class="lesson-recap">
         <span class="lesson-label">What You'll Use</span>
         <ul>
-          <li>Reading tracebacks bottom-up (this chapter)</li>
+          <li>Reading tracebacks bottom-up and recognizing error types (this chapter)</li>
           <li><code>assert</code>, for your own sanity checks (this chapter)</li>
           <li>Everything from Chapter 11's save/load system</li>
         </ul>

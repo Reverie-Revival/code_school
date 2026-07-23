@@ -21,8 +21,11 @@ export const chapter = {
       id: "8.1",
       title: "Importing Code Other People Wrote",
       content: `
-        <p><code>import module_name</code> brings in a whole module; after that, its functions are
-        available as <code>module_name.function_name()</code>.</p>
+        <p>Writing your own code for things like square roots or precise dates from scratch would
+        be a huge waste of effort — someone's already solved those problems, tested the solution
+        thoroughly, and packaged it up for anyone to use. <code>import module_name</code> brings
+        in a whole one of those packages (a <strong>module</strong>); after that, its functions
+        are available as <code>module_name.function_name()</code>.</p>
         <div class="lesson-example">
           <span class="lesson-label">Example</span>
           <pre><code>import math
@@ -67,21 +70,19 @@ print(math.floor(7.9))`,
     },
     {
       id: "8.2",
-      title: "random: Adding Chance to the Game",
+      title: "random.randint(): Dice Rolls",
       content: `
-        <p>The <code>random</code> module adds actual unpredictability: <code>random.randint(a,
-        b)</code> picks a whole number from <code>a</code> to <code>b</code> (inclusive on both
-        ends), and <code>random.choice(a_list)</code> picks one item from a list at random.</p>
+        <p><code>random.randint(a, b)</code> picks a whole number from <code>a</code> to
+        <code>b</code>, <strong>inclusive on both ends</strong> — the exact tool for simulating a
+        dice roll.</p>
         <div class="lesson-example">
           <span class="lesson-label">Example</span>
           <pre><code>import random
 
 roll = random.randint(1, 6)
-loot = random.choice(["gold", "gem", "nothing"])
-print(f"You rolled a {roll} and found {loot}.")</code></pre>
+print(f"You rolled a {roll}.")</code></pre>
           <p>Output changes every run — that's the point. <code>randint(1, 6)</code> simulates a
-          six-sided die; <code>choice(...)</code> picks unpredictably from whatever list you give
-          it.</p>
+          six-sided die: any of <code>1, 2, 3, 4, 5, 6</code> is equally likely to come up.</p>
         </div>
         <div class="lesson-tip">
           <span class="lesson-label">Watch Out For</span>
@@ -91,12 +92,13 @@ print(f"You rolled a {roll} and found {loot}.")</code></pre>
         <div class="lesson-turn">
           <span class="lesson-label">Your Turn</span>
           <p>Import <code>random</code> and print a random number from <code>1</code> to
-          <code>20</code> using <code>random.randint(...)</code>.</p>
+          <code>20</code> using <code>random.randint(...)</code> (a twenty-sided die — the classic
+          "d20").</p>
         </div>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
-          <p><code>random.randint(a, b)</code> and <code>random.choice(a_list)</code> are the two
-          you'll reach for most for dice rolls and random picks.</p>
+          <p><code>random.randint(a, b)</code> — a whole number from <code>a</code> to
+          <code>b</code>, both ends included.</p>
         </div>
       `,
       starterCode: `# import random, then print a random number from 1 to 20`,
@@ -116,11 +118,112 @@ print(random.randint(1, 20))`,
     },
     {
       id: "8.3",
+      title: "random.choice(): Random Picks",
+      content: `
+        <p><code>random.choice(a_list)</code> picks one item from a list at random — the tool for
+        "surprise me with one of these," like which item drops as loot.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>import random
+
+loot = ["gold", "gem", "nothing"]
+print(random.choice(loot))</code></pre>
+          <p>Output changes every run — one of <code>gold</code>, <code>gem</code>, or
+          <code>nothing</code>, picked unpredictably. Unlike <code>random.randint()</code>,
+          <code>random.choice()</code> works on <em>any</em> list, not just numbers — strings,
+          dictionaries, anything.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p><code>random.choice([])</code> — an empty list — crashes with an
+          <code>IndexError</code>. There has to be at least one item to pick from.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p>Import <code>random</code>. Given <code>enemies = ["goblin", "skeleton",
+          "wolf"]</code>, print one randomly chosen enemy from the list.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p><code>random.choice(a_list)</code> picks one item unpredictably — the natural
+          partner to <code>random.randint()</code> for dice rolls.</p>
+        </div>
+      `,
+      starterCode: `enemies = ["goblin", "skeleton", "wolf"]
+# import random, then print a randomly chosen enemy`,
+      practice: {
+        instructions: "Print one of: goblin, skeleton, or wolf.",
+        solution: `enemies = ["goblin", "skeleton", "wolf"]
+import random
+print(random.choice(enemies))`,
+        check(actualOutput) {
+          const got = actualOutput.trim();
+          if (["goblin", "skeleton", "wolf"].includes(got)) {
+            return { pass: true, message: `Chose "${got}" — random.choice() is working.` };
+          }
+          return { pass: false, message: "Not quite — print exactly one of goblin, skeleton, or wolf using random.choice(enemies)." };
+        },
+      },
+    },
+    {
+      id: "8.4",
+      title: "A Taste of datetime",
+      content: `
+        <p>The <code>datetime</code> module deals with dates and times — useful any time your
+        program needs to know "what is right now," like stamping a save file with when it was
+        created.</p>
+        <div class="lesson-example">
+          <span class="lesson-label">Example</span>
+          <pre><code>import datetime
+
+now = datetime.datetime.now()
+print(now.year)
+print(now.strftime("%Y-%m-%d"))</code></pre>
+          <p><code>datetime.datetime.now()</code> gives you the current date and time as an
+          object with pieces you can read individually, like <code>.year</code>.
+          <code>.strftime(...)</code> ("string format time") turns it into exactly the text
+          layout you want — <code>"%Y-%m-%d"</code> produces something like
+          <code>2026-07-23</code>.</p>
+        </div>
+        <div class="lesson-tip">
+          <span class="lesson-label">Watch Out For</span>
+          <p>notice the double <code>datetime.datetime</code> — the <em>module</em> is called
+          <code>datetime</code>, and inside it is a <em>class</em> also called
+          <code>datetime</code>. It looks repetitive, but both names are doing a real job.</p>
+        </div>
+        <div class="lesson-turn">
+          <span class="lesson-label">Your Turn</span>
+          <p>Import <code>datetime</code>, get the current time with
+          <code>datetime.datetime.now()</code>, and print its <code>.year</code>.</p>
+        </div>
+        <div class="lesson-recap">
+          <span class="lesson-label">Recap</span>
+          <p><code>datetime.datetime.now()</code> gets the current date/time;
+          <code>.strftime(...)</code> formats it as text however you need.</p>
+        </div>
+      `,
+      starterCode: `# import datetime, get datetime.datetime.now(), print its .year`,
+      practice: {
+        instructions: "Print the current year (a 4-digit number).",
+        solution: `import datetime
+now = datetime.datetime.now()
+print(now.year)`,
+        check(actualOutput) {
+          const got = actualOutput.trim();
+          if (/^\d{4}$/.test(got)) {
+            return { pass: true, message: `Printed the current year (${got}).` };
+          }
+          return { pass: false, message: "Not quite — print now.year, a 4-digit number." };
+        },
+      },
+    },
+    {
+      id: "8.5",
       title: "Chapter 8 Wrap-Up",
       content: `
-        <p><code>import</code> unlocks the standard library, and <code>random</code> specifically
-        unlocks real chance — dice rolls, random loot, anything that shouldn't be the same every
-        time.</p>
+        <p><code>import</code> unlocks the whole standard library — <code>random</code> for
+        chance, <code>datetime</code> for the current time, and plenty more you'll discover as you
+        keep building.</p>
         <div class="lesson-recap">
           <span class="lesson-label">Recap</span>
           <p>Chapter 8 complete. Next: dice-roll combat and random loot drops.</p>
