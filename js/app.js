@@ -1,7 +1,7 @@
-import { chapters } from "../curriculum/python/chapters/index.js";
 import { fetchProgress, markLessonComplete, markProjectDone } from "./progress.js";
 import { fetchSavedCode, saveCode } from "./savedCode.js";
 import { getErrorHint } from "./errorHints.js";
+import { showCertificate } from "./certificate.js";
 
 const WELCOME = "welcome"; // currentIndex sentinel for the chapter welcome page
 const PROJECT = "project"; // currentIndex sentinel for the chapter's end-of-chapter Project
@@ -30,10 +30,13 @@ const prevBtn = document.getElementById("prev-lesson-btn");
 const nextBtn = document.getElementById("next-lesson-btn");
 const lessonSelect = document.getElementById("lesson-select");
 const lessonTitle = document.getElementById("lesson-title");
+const courseCompleteModal = document.getElementById("course-complete-modal");
 
 let pyodide = null;
+let activeCourse = null; // the course object passed to startApp(); { id, chapters, ... }
+let chapters = []; // activeCourse.chapters, kept as its own binding to match existing call sites
 let currentChapterIndex = 0; // index into `chapters`
-let chapter = chapters[0];
+let chapter = null;
 let currentIndex = WELCOME; // WELCOME, or a 0-based index into chapter.lessons
 let lastOutput = "";
 let currentProfile = null;
@@ -44,6 +47,7 @@ let projectRanCleanly = false; // whether the current Project's code has run wit
 let preHelpCode = null; // snapshot of code-input right before Help overwrote it, or null if unused
 let savedCodeByKey = new Map(); // `${chapterNumber}:${lessonNumber ?? "project"}` -> last-saved code string
 let saveCodeTimer = null; // debounce handle for saving as-you-type edits
+let courseAlreadyComplete = false; // whether the active course was already 100% done as of startApp() -- guards the certificate from popping again on every visit after the first
 
 // Storage key for the code currently on screen -- lessonNumber is 1-based
 // (matching `progress`/`saved_code`'s convention), or null for a Project.
@@ -81,7 +85,7 @@ function flushSaveCode() {
 
   savedCodeByKey.set(key, code);
   const lessonNumber = currentIndex === PROJECT ? null : currentIndex + 1;
-  return saveCode({ profileId: currentProfile.id, chapterNumber: chapter.number, lessonNumber, code }).catch((err) => {
+  return saveCode({ profileId: currentProfile.id, courseId: activeCourse.id, chapterNumber: chapter.number, lessonNumber, code }).catch((err) => {
     // Low-stakes: a failed save shouldn't interrupt the kid's flow.
     console.warn("Couldn't save code:", err);
   });
@@ -92,6 +96,20 @@ function flushSaveCode() {
 function currentLesson() {
   if (currentIndex === WELCOME || currentIndex === PROJECT) return null;
   return chapter.lessons[currentIndex];
+}
+
+// Is there anything Help could fill in right now? A lesson's practice.solution
+// is a full worked answer to that lesson's tiny snippet. A Project has no
+// separate "solution" (see curriculum/*/chapters -- project objects are just
+// { title, content, starterCode }) -- but its starterCode is itself a
+// complete, runnable version of the project, so Help falls back to that:
+// restoring a known-working starting point beats leaving a kid stuck on a
+// Project with an error and no way to recover except undoing by hand.
+function currentHelpCode() {
+  const lesson = currentLesson();
+  if (lesson && lesson.practice && lesson.practice.solution) return lesson.practice.solution;
+  if (currentIndex === PROJECT && chapter.project) return chapter.project.starterCode;
+  return null;
 }
 
 function completedFor(chapterMeta) {
@@ -109,6 +127,34 @@ function isChapterDone(chapterMeta) {
   const lessonsDone = completedFor(chapterMeta).size >= chapterMeta.lessons.length;
   const projectDone = !chapterMeta.project || projectDoneByChapter.get(chapterMeta.number);
   return lessonsDone && projectDone;
+}
+
+// Pops the certificate the moment every chapter in the active course first
+// becomes done -- not on every subsequent visit, hence the
+// courseAlreadyComplete guard (set once here, and pre-seeded in startApp for
+// a course that was already finished coming in).
+function maybeShowCourseComplete() {
+  if (courseAlreadyComplete || chapters.length === 0) return;
+  if (!chapters.every(isChapterDone)) return;
+  courseAlreadyComplete = true;
+  showCourseCompleteModal();
+}
+
+function showCourseCompleteModal() {
+  showCertificate({
+    profileName: currentProfile.display_name,
+    courseTitle: activeCourse.title,
+    badgeEmoji: activeCourse.trackEmoji || "🏅",
+    color: activeCourse.color,
+    dateLabel: new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }),
+    // app.js doesn't know about the Home screen (that's main.js's), so hand
+    // off via a custom event rather than importing main.js back into
+    // app.js -- main.js listens for this to send the kid to Home, naturally
+    // pointing at whatever's unlocked next.
+    onClose: () => {
+      window.dispatchEvent(new CustomEvent("codeschool:course-complete-closed", { detail: { courseId: activeCourse.id } }));
+    },
+  });
 }
 
 // A chapter is locked until the chapter before it is done. The first
@@ -302,6 +348,10 @@ async function runCurrentCode() {
 import io, contextlib
 
 def _browser_input(prompt=""):
+    # Show whatever's been printed so far before the prompt pops up, so an
+    # interactive loop reads as "prompt, see the result, prompt again" —
+    # not one long silent wait followed by every turn's output at once.
+    _flush_output(_buf.getvalue())
     answer = _browser_prompt(prompt)
     if answer is None:
         raise EOFError("EOF when reading a line")
@@ -329,8 +379,7 @@ _output = _buf.getvalue()
       // An error means there's no output to show pass/fail feedback next to,
       // so put Help/Reset here instead — otherwise a lesson that errors out
       // (e.g. a SyntaxError) leaves a stuck kid with no way to get help.
-      const lesson = currentLesson();
-      errorHintActions.hidden = !(lesson && lesson.practice && lesson.practice.solution);
+      errorHintActions.hidden = !currentHelpCode();
     } else {
       // Every successful run doubles as a practice check when the lesson
       // has one — not graded/punitive, just tells the kid whether this run
@@ -349,8 +398,7 @@ _output = _buf.getvalue()
     errorsContent.textContent = `Something went wrong running your code: ${err}`;
     errorHintText.textContent = getErrorHint(String(err));
     errorsPane.hidden = false;
-    const lesson = currentLesson();
-    errorHintActions.hidden = !(lesson && lesson.practice && lesson.practice.solution);
+    errorHintActions.hidden = !currentHelpCode();
     if (currentIndex === PROJECT) {
       projectRanCleanly = false;
       updateProjectDoneButton();
@@ -394,6 +442,7 @@ async function recordCompletion(lessonNumber) {
   try {
     await markLessonComplete({
       profileId: currentProfile.id,
+      courseId: activeCourse.id,
       chapterNumber: chapter.number,
       lessonNumber,
     });
@@ -403,6 +452,7 @@ async function recordCompletion(lessonNumber) {
       renderLessonSelect();
       nextBtn.disabled = false;
     }
+    maybeShowCourseComplete();
   } catch (err) {
     // Low-stakes: a failed progress save shouldn't interrupt the kid's flow.
     console.warn("Couldn't save progress:", err);
@@ -410,18 +460,18 @@ async function recordCompletion(lessonNumber) {
 }
 
 function applyHelp() {
-  const lesson = currentLesson();
-  if (!lesson || !lesson.practice || !lesson.practice.solution) return;
+  const helpCode = currentHelpCode();
+  if (!helpCode) return;
 
-  // Only snapshot the first time Help is pressed for this lesson, so a
-  // second press doesn't overwrite the snapshot with the already-helped
+  // Only snapshot the first time Help is pressed for this lesson/project, so
+  // a second press doesn't overwrite the snapshot with the already-helped
   // code (which would make Reset a no-op).
   if (preHelpCode === null) {
     preHelpCode = codeInput.value;
     resetBtn.disabled = false;
     resetBtnError.disabled = false;
   }
-  codeInput.value = lesson.practice.solution;
+  codeInput.value = helpCode;
   scheduleSaveCode();
 }
 
@@ -545,10 +595,11 @@ lessonSelect.addEventListener("change", () => {
 projectDoneBtn.addEventListener("click", async () => {
   if (currentIndex !== PROJECT || !projectRanCleanly) return;
   try {
-    await markProjectDone({ profileId: currentProfile.id, chapterNumber: chapter.number });
+    await markProjectDone({ profileId: currentProfile.id, courseId: activeCourse.id, chapterNumber: chapter.number });
     projectDoneByChapter.set(chapter.number, true);
     updateProjectDoneButton();
     renderLessonSelect();
+    maybeShowCourseComplete();
   } catch (err) {
     // Low-stakes: a failed save shouldn't block the kid from moving on;
     // they can just click again.
@@ -563,36 +614,44 @@ export async function flushSavedCode() {
   await flushSaveCode();
 }
 
-export async function startApp(profile) {
+export async function startApp(profile, course) {
   currentProfile = profile;
+  activeCourse = course;
+  chapters = course.chapters;
   lessonTitle.hidden = false;
   lessonSelect.hidden = false;
+  courseCompleteModal.hidden = true;
 
   completedByChapter = new Map();
   projectDoneByChapter = new Map();
   try {
     const rows = await fetchProgress(currentProfile.id);
-    rows.forEach((row) => {
-      // A null lesson_number is a chapter-level Project checkpoint row, not
-      // a lesson (see the progress table's own comment).
-      if (row.lesson_number === null) {
-        if (row.completed_at) {
-          projectDoneByChapter.set(row.chapter_number, true);
+    rows
+      .filter((row) => row.course_id === activeCourse.id)
+      .forEach((row) => {
+        // A null lesson_number is a chapter-level Project checkpoint row, not
+        // a lesson (see the progress table's own comment).
+        if (row.lesson_number === null) {
+          if (row.completed_at) {
+            projectDoneByChapter.set(row.chapter_number, true);
+          }
+          return;
         }
-        return;
-      }
-      completedFor({ number: row.chapter_number }).add(row.lesson_number);
-    });
+        completedFor({ number: row.chapter_number }).add(row.lesson_number);
+      });
   } catch (err) {
     console.warn("Couldn't load progress:", err);
   }
+  courseAlreadyComplete = chapters.length > 0 && chapters.every(isChapterDone);
 
   savedCodeByKey = new Map();
   try {
     const rows = await fetchSavedCode(currentProfile.id);
-    rows.forEach((row) => {
-      savedCodeByKey.set(savedCodeKey(row.chapter_number, row.lesson_number), row.code);
-    });
+    rows
+      .filter((row) => row.course_id === activeCourse.id)
+      .forEach((row) => {
+        savedCodeByKey.set(savedCodeKey(row.chapter_number, row.lesson_number), row.code);
+      });
   } catch (err) {
     console.warn("Couldn't load saved code:", err);
   }
@@ -627,6 +686,11 @@ export async function startApp(profile) {
   // prompt text straight into the dialog rather than letting it leak into
   // the captured Output (which is what Python's own input() would do).
   pyodide.globals.set("_browser_prompt", (promptText) => window.prompt(promptText));
+  // Called right before each prompt so the Output pane shows every turn's
+  // result as it happens, not just once at the very end.
+  pyodide.globals.set("_flush_output", (partialOutput) => {
+    outputContent.textContent = partialOutput || "(no output yet)";
+  });
 
   outputContent.textContent = "Ready! Press Run to try the code.";
   runBtn.disabled = false;

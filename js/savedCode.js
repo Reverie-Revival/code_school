@@ -13,17 +13,18 @@ export async function fetchSavedCode(profileId) {
 // upsert's onConflict (Postgres never treats two NULLs as conflicting under
 // a UNIQUE constraint), so that case is handled with a select-then-write,
 // same pattern as progress.js's markProjectDone.
-export async function saveCode({ profileId, chapterNumber, lessonNumber, code }) {
+export async function saveCode({ profileId, courseId, chapterNumber, lessonNumber, code }) {
   if (lessonNumber !== null) {
     const { error } = await supabaseClient.from("saved_code").upsert(
       {
         profile_id: profileId,
+        course_id: courseId,
         chapter_number: chapterNumber,
         lesson_number: lessonNumber,
         code,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "profile_id,chapter_number,lesson_number" }
+      { onConflict: "profile_id,course_id,chapter_number,lesson_number" }
     );
     if (error) throw error;
     return;
@@ -33,6 +34,7 @@ export async function saveCode({ profileId, chapterNumber, lessonNumber, code })
     .from("saved_code")
     .select("id")
     .eq("profile_id", profileId)
+    .eq("course_id", courseId)
     .eq("chapter_number", chapterNumber)
     .is("lesson_number", null)
     .maybeSingle();
@@ -49,6 +51,7 @@ export async function saveCode({ profileId, chapterNumber, lessonNumber, code })
 
   const { error } = await supabaseClient.from("saved_code").insert({
     profile_id: profileId,
+    course_id: courseId,
     chapter_number: chapterNumber,
     lesson_number: null,
     code,

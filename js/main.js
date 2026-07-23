@@ -1,5 +1,8 @@
 import { fetchProfiles, createProfile, updateProfile, deleteProfile, AVATAR_COLORS, AVATAR_EMOJIS } from "./profiles.js";
 import { startApp, flushSavedCode } from "./app.js";
+import { fetchProgress } from "./progress.js";
+import { TRACKS, isCourseComplete, courseProgress, courseCompletedDate } from "./courses.js";
+import { showCertificate } from "./certificate.js";
 
 const profilePicker = document.getElementById("profile-picker");
 const profileList = document.getElementById("profile-list");
@@ -25,11 +28,19 @@ const pinError = document.getElementById("pin-error");
 const pinForgotBtn = document.getElementById("pin-forgot-btn");
 
 const lessonGrid = document.querySelector("main.lesson-grid");
+const lessonTitle = document.getElementById("lesson-title");
+const lessonSelect = document.getElementById("lesson-select");
 const currentProfileBadge = document.getElementById("current-profile-badge");
 const currentProfileAvatar = document.getElementById("current-profile-avatar");
 const currentProfileName = document.getElementById("current-profile-name");
 const editProfileBtn = document.getElementById("edit-profile-btn");
 const switchProfileBtn = document.getElementById("switch-profile-btn");
+const changeCourseBtn = document.getElementById("change-course-btn");
+
+const homeScreen = document.getElementById("home-screen");
+const homeAvatarWrap = document.getElementById("home-avatar-wrap");
+const homeProfileName = document.getElementById("home-profile-name");
+const homeTracks = document.getElementById("home-tracks");
 
 const EDIT_PROFILE_STORAGE_KEY = "codeSchoolEditProfileId";
 
@@ -39,6 +50,7 @@ let selectedEmoji = null; // null = fall back to the display name's initial
 let pendingProfile = null;
 let editingProfileId = null; // profile.id being edited, or null when creating
 let currentProfileId = null;
+let currentProfileProgress = []; // raw progress rows for currentProfileId, across all courses -- fetched once when a profile is picked, used to lock/badge courses without re-querying per card
 
 function showPickerView(view) {
   profileList.hidden = view !== "list";
@@ -96,9 +108,99 @@ function renderEmojiPicker() {
   });
 }
 
-function renderProfileList() {
+const ALL_COURSES = TRACKS.flatMap((track) => track.courses);
+
+function completedCoursesFor(progressRows) {
+  return ALL_COURSES.filter((course) => isCourseComplete(course, progressRows));
+}
+
+// Draws one achievement ring per completed course directly around
+// whatever element it's given -- innermost ring is the earliest completed
+// course, each later one wider and in that course's own color (so one
+// course done alone looks like a single gold ring; finish a second and a
+// wider red ring appears around that gold one; a track with more courses
+// just keeps growing outward). Pure box-shadow layering, no extra markup
+// needed: a solid box-shadow with spread N and no blur reads as a ring of
+// that color N pixels wide around the (opaque, same-shape) element it's
+// attached to, and later, larger-spread shadows show through in the band
+// beyond the smaller ones stacked in front of them.
+function applyAchievementRings(el, completedCourses, ringWidth, ringGap) {
+  if (completedCourses.length === 0) {
+    el.style.boxShadow = "";
+    return;
+  }
+  const shadows = [];
+  let radius = 0;
+  completedCourses.forEach((course, i) => {
+    if (i > 0) radius += ringGap; // thin background groove separating each ring from the last
+    shadows.push(`0 0 0 ${radius}px var(--bg)`);
+    radius += ringWidth;
+    shadows.push(`0 0 0 ${radius}px ${course.color || "#caa53d"}`);
+  });
+  // Deliberately no margin here: box-shadow spread is purely visual and
+  // doesn't grow the element's own layout box, so every pin -- ringed or
+  // not -- stays exactly the same height in the row, keeping every
+  // profile's avatar aligned regardless of how many rings it's earned.
+  // The pins row's own `gap` (see CSS) gives the rings room to bleed into
+  // without touching a neighboring pin.
+  el.style.boxShadow = shadows.join(", ");
+}
+
+// Builds the avatar circle (plain, no rings -- keeps it uncluttered no
+// matter how many tracks/courses pile up) plus one small pinned icon per
+// track the profile has made any progress toward. The rings live on each
+// pin instead, scoped to just that track's completed courses -- so a
+// second track (JavaScript, say) gets its own pin with its own independent
+// ring stack, rather than every track's achievements competing for space
+// around one already-crowded avatar. Returns a wrapper ready to drop into
+// a card.
+function renderAvatarWithAchievements(profile, completedCourses) {
+  const wrap = document.createElement("span");
+  wrap.className = "avatar-wrap";
+
+  // Pins render above the avatar (not overlapping it) so they never
+  // collide with the name text below, no matter how many tracks/rings. This
+  // row is always present -- even with zero pins in it -- so every
+  // profile's avatar sits at the same height, whether or not they've
+  // earned anything yet, rather than the ones with pins sitting lower.
+  const tracksWithProgress = TRACKS.filter((track) => track.courses.some((c) => completedCourses.includes(c)));
+  const pins = document.createElement("span");
+  pins.className = "avatar-track-pins";
+  tracksWithProgress.forEach((track) => {
+    const completedInTrack = track.courses.filter((c) => completedCourses.includes(c));
+    const pin = document.createElement("span");
+    pin.className = "avatar-track-pin";
+    pin.textContent = track.emoji;
+    applyAchievementRings(pin, completedInTrack, 3, 1);
+    pins.appendChild(pin);
+  });
+  wrap.appendChild(pins);
+
+  const avatar = document.createElement("span");
+  avatar.className = "profile-avatar";
+  renderAvatar(avatar, profile);
+  wrap.appendChild(avatar);
+
+  return wrap;
+}
+
+async function renderProfileList() {
   profileList.innerHTML = "";
-  profiles.forEach((profile) => {
+
+  // Small, family-scale profile count -- one progress fetch per profile up
+  // front is cheap, and lets each card show a token per completed course.
+  const completedByProfile = await Promise.all(
+    profiles.map(async (profile) => {
+      try {
+        return completedCoursesFor(await fetchProgress(profile.id));
+      } catch (err) {
+        console.warn(`Couldn't load progress for ${profile.display_name}:`, err);
+        return [];
+      }
+    })
+  );
+
+  profiles.forEach((profile, i) => {
     const card = document.createElement("div");
     card.className = "profile-card";
 
@@ -106,16 +208,13 @@ function renderProfileList() {
     selectBtn.type = "button";
     selectBtn.className = "profile-select-btn";
 
-    const avatar = document.createElement("span");
-    avatar.className = "profile-avatar";
-    renderAvatar(avatar, profile);
+    selectBtn.appendChild(renderAvatarWithAchievements(profile, completedByProfile[i]));
 
     const name = document.createElement("span");
     name.className = "profile-name";
     name.textContent = profile.display_name;
-
-    selectBtn.appendChild(avatar);
     selectBtn.appendChild(name);
+
     selectBtn.addEventListener("click", () => selectProfile(profile));
 
     const editBtn = document.createElement("button");
@@ -140,19 +239,182 @@ function selectProfile(profile) {
     showPickerView("pin");
     pinInput.focus();
   } else {
-    enterApp(profile);
+    chooseProfile(profile);
   }
 }
 
-function enterApp(profile) {
+// Profile chosen -- show the header badge and hand off to Home (not
+// straight into the lesson grid; the kid picks a course from there first).
+async function chooseProfile(profile) {
   currentProfileId = profile.id;
   profilePicker.hidden = true;
-  lessonGrid.hidden = false;
   currentProfileBadge.hidden = false;
   currentProfileName.textContent = profile.display_name;
   renderAvatar(currentProfileAvatar, profile);
-  startApp(profile);
+
+  try {
+    currentProfileProgress = await fetchProgress(profile.id);
+  } catch (err) {
+    console.warn("Couldn't load progress:", err);
+    currentProfileProgress = [];
+  }
+
+  showHome(profile);
 }
+
+// Hides everything the lesson-grid screen adds to the header (chapter/lesson
+// title + jump dropdown, "Change Course") -- called whenever navigating away
+// from it back to a picker screen, so the header just reads "Code School"
+// plus the profile badge.
+function hideLessonGridChrome() {
+  lessonGrid.hidden = true;
+  changeCourseBtn.hidden = true;
+  lessonTitle.hidden = true;
+  lessonSelect.hidden = true;
+}
+
+// Home is both the course selector and the profile's dashboard: profile
+// header up top, then one section per track, each listing that track's
+// courses with a progress bar / lock state / "coming soon" / earned token.
+function showHome(profile) {
+  hideLessonGridChrome();
+  homeScreen.hidden = false;
+  homeAvatarWrap.innerHTML = "";
+  homeAvatarWrap.appendChild(renderAvatarWithAchievements(profile, completedCoursesFor(currentProfileProgress)));
+  homeProfileName.textContent = `${profile.display_name}'s Courses`;
+  renderHomeTracks();
+}
+
+function renderHomeTracks() {
+  homeTracks.innerHTML = "";
+  TRACKS.forEach((track) => {
+    const section = document.createElement("section");
+    section.className = "home-track-section";
+
+    const heading = document.createElement("h3");
+    heading.className = "home-track-heading";
+    heading.textContent = `${track.emoji} ${track.label}`;
+    section.appendChild(heading);
+
+    const list = document.createElement("div");
+    list.className = "home-course-list";
+    track.courses.forEach((course, i) => {
+      list.appendChild(renderCourseCard(track, course, track.courses[i - 1] || null));
+    });
+    section.appendChild(list);
+
+    homeTracks.appendChild(section);
+  });
+}
+
+function renderCourseCard(track, course, previousCourse) {
+  const complete = isCourseComplete(course, currentProfileProgress);
+  const lockedByPrerequisite = previousCourse && !isCourseComplete(previousCourse, currentProfileProgress);
+  const comingSoon = course.chapters.length === 0;
+  const locked = !complete && (lockedByPrerequisite || comingSoon);
+  const { done, total } = courseProgress(course, currentProfileProgress);
+
+  const card = document.createElement("div");
+  card.className = "course-card home-course-card" + (complete ? " course-complete" : "");
+  if (complete) card.style.setProperty("--course-color", course.color || "#caa53d");
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "course-select-btn";
+  btn.disabled = locked;
+
+  const icon = document.createElement("span");
+  icon.className = "course-icon";
+  icon.textContent = complete ? course.trackEmoji : locked ? "🔒" : "📘";
+
+  const title = document.createElement("span");
+  title.className = "course-title";
+  title.textContent = course.title;
+
+  btn.appendChild(icon);
+  btn.appendChild(title);
+
+  if (total > 0) {
+    const bar = document.createElement("div");
+    bar.className = "course-progress-bar";
+    const fill = document.createElement("div");
+    fill.className = "course-progress-fill";
+    fill.style.width = `${Math.round((done / total) * 100)}%`;
+    bar.appendChild(fill);
+    btn.appendChild(bar);
+
+    const label = document.createElement("span");
+    label.className = "course-progress-label";
+    label.textContent = complete ? "Complete!" : `${done}/${total}`;
+    btn.appendChild(label);
+  }
+
+  const subtitle = document.createElement("span");
+  subtitle.className = "course-subtitle";
+  subtitle.textContent = comingSoon ? "Coming soon" : lockedByPrerequisite ? `Finish Course ${previousCourse.number} to Unlock` : "";
+  if (subtitle.textContent) btn.appendChild(subtitle);
+
+  // The card itself always re-enters the course, complete or not -- a
+  // finished course should still be freely revisitable, not sealed behind
+  // its own certificate. Reopening the certificate is a separate, small
+  // link below the card so neither action blocks the other.
+  if (!locked) {
+    btn.addEventListener("click", () => enterApp(course));
+  }
+  card.appendChild(btn);
+
+  if (complete) {
+    const viewCertBtn = document.createElement("button");
+    viewCertBtn.type = "button";
+    viewCertBtn.className = "view-certificate-btn";
+    viewCertBtn.textContent = "🎓 View Certificate";
+    viewCertBtn.addEventListener("click", () => {
+      const profile = profiles.find((p) => p.id === currentProfileId);
+      const earnedDate = courseCompletedDate(course, currentProfileProgress);
+      showCertificate({
+        profileName: profile.display_name,
+        courseTitle: course.title,
+        badgeEmoji: course.trackEmoji,
+        color: course.color,
+        dateLabel: earnedDate
+          ? earnedDate.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+          : "",
+      });
+    });
+    card.appendChild(viewCertBtn);
+  }
+
+  return card;
+}
+
+changeCourseBtn.addEventListener("click", async () => {
+  await flushSavedCode();
+  const profile = profiles.find((p) => p.id === currentProfileId);
+  showHome(profile);
+});
+
+function enterApp(course) {
+  const profile = profiles.find((p) => p.id === currentProfileId);
+  homeScreen.hidden = true;
+  lessonGrid.hidden = false;
+  changeCourseBtn.hidden = false;
+  startApp(profile, course);
+}
+
+// Fired by app.js's certificate modal when a kid dismisses it right after
+// finishing a course -- rather than leaving them sitting on the lesson they
+// just finished, send them back to Home, which now naturally shows what's
+// next (unlocked, "coming soon," or another earned token).
+window.addEventListener("codeschool:course-complete-closed", async () => {
+  await flushSavedCode();
+  try {
+    currentProfileProgress = await fetchProgress(currentProfileId);
+  } catch (err) {
+    console.warn("Couldn't refresh progress:", err);
+  }
+  const profile = profiles.find((p) => p.id === currentProfileId);
+  showHome(profile);
+});
 
 // Shared by "+ New Profile" and each card's "Edit" link -- pass a profile to
 // prefill the form and switch it into edit mode, or nothing to start blank.
@@ -251,7 +513,7 @@ newProfileForm.addEventListener("submit", async (e) => {
       const profile = await createProfile({ displayName, avatarColor: selectedColor, avatarEmoji: selectedEmoji, pin: typedPin });
       profiles.push(profile);
       renderProfileList();
-      enterApp(profile);
+      chooseProfile(profile);
     }
   } catch (err) {
     // Low-stakes family app: a plain alert is enough here, no need for a
@@ -267,7 +529,7 @@ pinPrompt.addEventListener("submit", (e) => {
   if (pinInput.value === pendingProfile.pin) {
     const profile = pendingProfile;
     pendingProfile = null;
-    enterApp(profile);
+    chooseProfile(profile);
   } else {
     pinError.hidden = false;
     pinInput.value = "";

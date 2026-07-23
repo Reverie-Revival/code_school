@@ -151,19 +151,330 @@ body {
 }
 
 .profile-avatar {
-  width: 72px;
-  height: 72px;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 1.75rem;
+  font-size: 2.1rem;
   font-weight: 700;
 }
 
 .profile-name {
   font-weight: 600;
+}
+
+/* Stacks a small pinned icon per track (same icon regardless of which
+   course in that track was finished) above the avatar, plain in-flow --
+   simpler and safer than overlapping the avatar, since it can never
+   collide with the name text below no matter how many tracks/rings pile
+   up. Each pin gets its own achievement rings, applied inline from
+   applyAchievementRings() in main.js. */
+.avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.avatar-track-pins {
+  display: flex;
+  align-items: center;
+  gap: 14px; /* extra room for a pin's rings to bleed outward without touching its neighbor */
+  min-height: 32px; /* reserved even when empty, so every avatar sits at the same height */
+}
+
+.avatar-track-pin {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-pane);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+/* Home screen -- profile dashboard + course selector in one. One section
+   per track, each a row of course cards with a square icon tile (vs.
+   .profile-avatar's circle, so a course reads as distinct from a person),
+   a progress bar, and locked/coming-soon/complete states. */
+
+.home-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  padding: 2rem 1.5rem;
+  overflow-y: auto;
+}
+
+.home-profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.home-profile-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+#home-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  width: 100%;
+  max-width: 720px;
+}
+
+.home-track-heading {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  text-align: center;
+}
+
+.home-course-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.course-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: 180px;
+}
+
+.course-select-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-pane);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 1rem 0.75rem;
+  width: 100%;
+  min-height: 190px; /* keeps every card the same size regardless of whether it has a subtitle/progress bar */
+}
+
+.course-select-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.course-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.course-title {
+  font-weight: 600;
+  text-align: center;
+}
+
+.course-subtitle {
+  font-size: 0.8rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.course-progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.course-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px 0 0 4px;
+  transition: width 0.3s ease;
+}
+
+.course-progress-label {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* A completed course's card and token get that course's own highlight
+   color (--course-color, set inline per-card in main.js from courses.js),
+   not the app's usual green accent -- it needs to read as a distinct "you
+   earned this" state, and a different course should look like a different
+   prize. */
+.course-complete .course-select-btn {
+  background: var(--bg-pane);
+  border: 3px solid var(--course-color, #caa53d);
+  opacity: 1;
+}
+
+.course-complete .course-icon {
+  background: var(--bg-pane);
+  border-color: var(--course-color, #caa53d);
+}
+
+.course-complete .course-progress-fill {
+  background: var(--course-color, #caa53d);
+}
+
+.course-complete .course-progress-label {
+  color: var(--course-color, #caa53d);
+  font-weight: 600;
+}
+
+.view-certificate-btn {
+  background: none;
+  border: none;
+  color: var(--course-color, #8a6d1f);
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.15rem;
+}
+
+/* Course-complete celebration */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 100;
+}
+
+.certificate-card {
+  background: var(--bg-pane);
+  border: 3px double var(--course-color, var(--accent));
+  border-radius: 14px;
+  padding: 2.25rem 2rem;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  animation: certificate-pop 0.35s ease-out;
+}
+
+@keyframes certificate-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.certificate-medal {
+  display: block;
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.certificate-heading {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+}
+
+.certificate-line {
+  margin: 0.15rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.certificate-name {
+  margin: 0.25rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--course-color, var(--accent));
+}
+
+.certificate-course {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.certificate-date {
+  margin: 0 0 1.25rem;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.certificate-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.certificate-close-btn {
+  background: var(--course-color, var(--accent));
+  color: var(--accent-text);
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.certificate-print-btn {
+  background: transparent;
+  color: var(--course-color, var(--accent));
+  border: 2px solid var(--course-color, var(--accent));
+  border-radius: 8px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Printing the certificate: hide literally everything else on the page
+   (header, lesson grid, Home screen, the modal's dark backdrop) so only
+   the certificate card itself ends up on paper, centered and undecorated
+   by the on-screen popup chrome. */
+@media print {
+  body > *:not(#course-complete-modal) {
+    display: none !important;
+  }
+
+  .modal-overlay {
+    position: static;
+    background: none;
+    padding: 0;
+  }
+
+  .certificate-card {
+    box-shadow: none;
+    animation: none;
+  }
+
+  .certificate-actions {
+    display: none;
+  }
 }
 
 #add-profile-btn {

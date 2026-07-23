@@ -9,17 +9,18 @@ export async function fetchProgress(profileId) {
   return data;
 }
 
-export async function markLessonComplete({ profileId, chapterNumber, lessonNumber }) {
+export async function markLessonComplete({ profileId, courseId, chapterNumber, lessonNumber }) {
   const { data, error } = await supabaseClient
     .from("progress")
     .upsert(
       {
         profile_id: profileId,
+        course_id: courseId,
         chapter_number: chapterNumber,
         lesson_number: lessonNumber,
         completed_at: new Date().toISOString(),
       },
-      { onConflict: "profile_id,chapter_number,lesson_number" }
+      { onConflict: "profile_id,course_id,chapter_number,lesson_number" }
     )
     .select()
     .single();
@@ -34,11 +35,12 @@ export async function markLessonComplete({ profileId, chapterNumber, lessonNumbe
 //
 // This is a kid self-click ("I showed someone!"), not a parent approval —
 // see CLAUDE.md's "Self check-in" principle.
-export async function markProjectDone({ profileId, chapterNumber }) {
+export async function markProjectDone({ profileId, courseId, chapterNumber }) {
   const { data: existing, error: selectError } = await supabaseClient
     .from("progress")
     .select("*")
     .eq("profile_id", profileId)
+    .eq("course_id", courseId)
     .eq("chapter_number", chapterNumber)
     .is("lesson_number", null)
     .maybeSingle();
@@ -49,6 +51,7 @@ export async function markProjectDone({ profileId, chapterNumber }) {
     .from("progress")
     .insert({
       profile_id: profileId,
+      course_id: courseId,
       chapter_number: chapterNumber,
       lesson_number: null,
       completed_at: new Date().toISOString(),

@@ -15,6 +15,7 @@
       <span id="current-profile-avatar" class="current-profile-avatar"></span>
       <span id="current-profile-name"></span>
       <button id="edit-profile-btn" type="button">Edit</button>
+      <button id="change-course-btn" type="button" hidden>Change Course</button>
       <button id="switch-profile-btn" type="button">Switch</button>
     </div>
   </header>
@@ -66,6 +67,14 @@
     </form>
   </div>
 
+  <div id="home-screen" class="home-screen" hidden>
+    <div class="home-profile-header">
+      <span id="home-avatar-wrap"></span>
+      <h2 id="home-profile-name"></h2>
+    </div>
+    <div id="home-tracks"></div>
+  </div>
+
   <main class="lesson-grid" hidden>
     <section class="pane lesson-pane" aria-label="Lesson">
       <div class="pane-header">
@@ -108,7 +117,7 @@
           <button
             id="help-btn"
             type="button"
-            title="Stuck? Help fills in working code for this lesson so you can see it run correctly — then press Run."
+            title="Stuck? Help fills in working code so you can see it run correctly — then press Run."
           >Help</button>
           <button
             id="reset-btn"
@@ -132,7 +141,7 @@
           <button
             id="help-btn-error"
             type="button"
-            title="Stuck? Help fills in working code for this lesson so you can see it run correctly — then press Run."
+            title="Stuck? Help fills in working code so you can see it run correctly — then press Run."
           >Help</button>
           <button
             id="reset-btn-error"
@@ -144,6 +153,22 @@
       </div>
     </section>
   </main>
+
+  <div id="course-complete-modal" class="modal-overlay" hidden>
+    <div id="certificate-card" class="certificate-card">
+      <span id="certificate-medal" class="certificate-medal">🏅</span>
+      <h2 class="certificate-heading">Certificate of Achievement</h2>
+      <p class="certificate-line">This certifies that</p>
+      <p id="certificate-name" class="certificate-name"></p>
+      <p class="certificate-line">has successfully completed</p>
+      <p id="certificate-course" class="certificate-course"></p>
+      <p id="certificate-date" class="certificate-date"></p>
+      <div class="certificate-actions">
+        <button id="certificate-print-btn" type="button" class="certificate-print-btn">🖨️ Print</button>
+        <button id="certificate-close-btn" type="button" class="certificate-close-btn">Awesome!</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Pyodide, loaded from its official CDN. Cached by the browser after first load. -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
