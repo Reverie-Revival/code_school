@@ -345,13 +345,42 @@ async function runCurrentCode() {
   try {
     pyodide.globals.set("__user_code", codeInput.value);
     await pyodide.runPythonAsync(`
-import io, contextlib
+import io, contextlib, ast
 
-def _browser_input(prompt=""):
-    # Show whatever's been printed so far before the prompt pops up, so an
-    # interactive loop reads as "prompt, see the result, prompt again" —
-    # not one long silent wait followed by every turn's output at once.
+# A plain synchronous exec() of a script with a "while True: input()" loop
+# runs the whole thing as one uninterrupted call from JS's point of view --
+# any DOM update made along the way sits queued, never actually painted,
+# until the entire script finishes (that's the bug this replaced: output
+# only ever appearing all at once, after the game was quit). The fix is to
+# make each input() call a genuine await, which lets Pyodide's own
+# top-level-await support hand control back to the browser for a real
+# paint before the (still synchronous, still a native popup) prompt shows.
+#
+# Kids write plain "command = input('> ')", never "await input(...)" -- so
+# this AST-transforms every bare call to input() into an awaited one, then
+# wraps the whole script in an async function to make that legal. It
+# deliberately does not descend into ordinary (non-async) "def" bodies --
+# await is only valid inside an async function, and no lesson/project today
+# calls input() from inside a nested def -- so those are left untouched
+# rather than risk producing invalid code for a pattern nothing uses yet.
+class _InputAwaiter(ast.NodeTransformer):
+    def visit_FunctionDef(self, node):
+        return node
+
+    def visit_Call(self, node):
+        self.generic_visit(node)
+        if isinstance(node.func, ast.Name) and node.func.id == "input":
+            return ast.Await(value=node)
+        return node
+
+async def _browser_input(prompt=""):
+    # Show whatever's been printed so far, actually let the browser paint it
+    # (the double rAF -- one before, one after a real frame is committed --
+    # is what _yield_to_browser does), *then* pop the native prompt. That's
+    # what makes an interactive loop read as "prompt, see the result, prompt
+    # again" instead of one long silent wait.
     _flush_output(_buf.getvalue())
+    await _yield_to_browser()
     answer = _browser_prompt(prompt)
     if answer is None:
         raise EOFError("EOF when reading a line")
@@ -360,8 +389,16 @@ def _browser_input(prompt=""):
 _buf = io.StringIO()
 _error = None
 try:
+    _tree = ast.parse(__user_code, mode="exec")
+    _tree = _InputAwaiter().visit(_tree)
+    _main = ast.parse("async def __main(): pass", mode="exec").body[0]
+    _main.body = _tree.body if _tree.body else [ast.Pass()]
+    _module = ast.fix_missing_locations(ast.Module(body=[_main], type_ignores=[]))
+    _code = compile(_module, "<student_code>", "exec")
+    _user_globals = {"input": _browser_input}
     with contextlib.redirect_stdout(_buf):
-        exec(__user_code, {"input": _browser_input})
+        exec(_code, _user_globals)
+        await _user_globals["__main"]()
 except Exception as e:
     _error = f"{type(e).__name__}: {e}"
 _output = _buf.getvalue()
@@ -691,6 +728,15 @@ export async function startApp(profile, course) {
   pyodide.globals.set("_flush_output", (partialOutput) => {
     outputContent.textContent = partialOutput || "(no output yet)";
   });
+  // Awaited (via Python's async input() wrapper) right before each prompt.
+  // Two rAFs, not one: the first fires before the browser paints the
+  // current frame, the second fires after that paint has actually landed —
+  // that gap is what guarantees the just-flushed output is genuinely on
+  // screen before the blocking prompt() dialog appears next.
+  pyodide.globals.set(
+    "_yield_to_browser",
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  );
 
   outputContent.textContent = "Ready! Press Run to try the code.";
   runBtn.disabled = false;
