@@ -815,6 +815,84 @@ body {
   white-space: nowrap;
 }
 
+.pane-header-left,
+.pane-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.icon-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text);
+  opacity: 0.4;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+}
+
+.icon-toggle-btn:hover {
+  opacity: 0.85;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.icon-toggle-btn[aria-pressed="true"] {
+  opacity: 1;
+  color: var(--accent);
+}
+
+/*
+ * Expand/collapse: clicking a pane's expand icon makes that pane fill the
+ * whole main area (see docs/decisions/0002-ui-layout.md for why the grid
+ * uses named areas) so a kid on a small screen can read their code or
+ * output without the other two-thirds of the layout crowding it. The
+ * errors row is deliberately kept visible in every expanded state, since
+ * matching a line number to an error message is the main reason to expand
+ * in the first place.
+ */
+.lesson-grid.expanded-lesson,
+.lesson-grid.expanded-editor,
+.lesson-grid.expanded-output {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto;
+}
+
+.lesson-grid.expanded-lesson {
+  grid-template-areas:
+    "lesson"
+    "errors";
+}
+
+.lesson-grid.expanded-lesson .editor-pane,
+.lesson-grid.expanded-lesson .output-pane {
+  display: none;
+}
+
+.lesson-grid.expanded-editor {
+  grid-template-areas:
+    "editor"
+    "errors";
+}
+
+.lesson-grid.expanded-editor .lesson-pane,
+.lesson-grid.expanded-editor .output-pane {
+  display: none;
+}
+
+.lesson-grid.expanded-output {
+  grid-template-areas:
+    "output"
+    "errors";
+}
+
+.lesson-grid.expanded-output .lesson-pane,
+.lesson-grid.expanded-output .editor-pane {
+  display: none;
+}
+
 #project-done-btn {
   margin-top: 0.75rem;
   background: var(--accent);
@@ -868,16 +946,43 @@ body {
   cursor: default;
 }
 
+.code-editor-wrap {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  background: var(--code-bg);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.code-line-numbers {
+  display: none;
+  flex-shrink: 0;
+  padding: 0.75rem 0.5rem 0.75rem 0.75rem;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #7a7a7a;
+  text-align: right;
+  white-space: pre;
+  overflow: hidden;
+  user-select: none;
+}
+
+.code-editor-wrap.show-line-numbers .code-line-numbers {
+  display: block;
+}
+
 #code-input {
   flex: 1;
   width: 100%;
+  min-width: 0;
   resize: none;
   font-family: "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.95rem;
-  background: var(--code-bg);
+  background: transparent;
   color: var(--code-text);
   border: none;
-  border-radius: 6px;
   padding: 0.75rem;
   line-height: 1.5;
 }

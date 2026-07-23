@@ -16,6 +16,13 @@ const practiceFeedback = document.getElementById("practice-feedback");
 const practiceFeedbackText = document.getElementById("practice-feedback-text");
 const practiceFeedbackActions = document.getElementById("practice-feedback-actions");
 const codeInput = document.getElementById("code-input");
+const codeEditorWrap = document.getElementById("code-editor-wrap");
+const codeLineNumbers = document.getElementById("code-line-numbers");
+const lineNumbersToggle = document.getElementById("line-numbers-toggle");
+const lessonExpandBtn = document.getElementById("lesson-expand-btn");
+const editorExpandBtn = document.getElementById("editor-expand-btn");
+const outputExpandBtn = document.getElementById("output-expand-btn");
+const lessonGrid = document.querySelector(".lesson-grid");
 const outputContent = document.getElementById("output-content");
 const errorsPane = document.getElementById("errors-pane");
 const errorsContent = document.getElementById("errors-content");
@@ -194,6 +201,7 @@ function renderLesson() {
   renderLessonSelect();
   lessonContent.innerHTML = lesson.content;
   codeInput.value = savedCodeByKey.get(savedCodeKey(chapter.number, lessonNumber)) ?? lesson.starterCode;
+  updateLineNumbers();
   outputContent.textContent = "";
   errorsContent.textContent = "";
   errorsPane.hidden = true;
@@ -229,6 +237,7 @@ function renderWelcome() {
   renderLessonSelect();
   lessonContent.innerHTML = chapter.welcome.content;
   codeInput.value = "# Pick a lesson above (or press Next) to start writing code!";
+  updateLineNumbers();
   outputContent.textContent = "";
   errorsContent.textContent = "";
   errorsPane.hidden = true;
@@ -252,6 +261,7 @@ function renderProject() {
   renderLessonSelect();
   lessonContent.innerHTML = project.content;
   codeInput.value = savedCodeByKey.get(savedCodeKey(chapter.number, null)) ?? project.starterCode;
+  updateLineNumbers();
   outputContent.textContent = "";
   errorsContent.textContent = "";
   errorsPane.hidden = true;
@@ -509,17 +519,71 @@ function applyHelp() {
     resetBtnError.disabled = false;
   }
   codeInput.value = helpCode;
+  updateLineNumbers();
   scheduleSaveCode();
 }
 
 function applyReset() {
   if (preHelpCode === null) return;
   codeInput.value = preHelpCode;
+  updateLineNumbers();
   resetHelpState();
   scheduleSaveCode();
 }
 
+// --- Line numbers (off by default; a kid's own choice, remembered locally) ---
+const LINE_NUMBERS_STORAGE_KEY = "codeSchool.showLineNumbers";
+
+function updateLineNumbers() {
+  if (!codeEditorWrap.classList.contains("show-line-numbers")) return;
+  const lineCount = codeInput.value.split("\n").length;
+  const nums = [];
+  for (let i = 1; i <= lineCount; i++) nums.push(i);
+  codeLineNumbers.textContent = nums.join("\n");
+  codeLineNumbers.scrollTop = codeInput.scrollTop;
+}
+
+function setLineNumbersVisible(visible) {
+  codeEditorWrap.classList.toggle("show-line-numbers", visible);
+  lineNumbersToggle.setAttribute("aria-pressed", String(visible));
+  lineNumbersToggle.title = visible ? "Hide line numbers" : "Show line numbers";
+  localStorage.setItem(LINE_NUMBERS_STORAGE_KEY, visible ? "1" : "0");
+  if (visible) updateLineNumbers();
+}
+
+lineNumbersToggle.addEventListener("click", () => {
+  setLineNumbersVisible(!codeEditorWrap.classList.contains("show-line-numbers"));
+});
+setLineNumbersVisible(localStorage.getItem(LINE_NUMBERS_STORAGE_KEY) === "1");
+
+codeInput.addEventListener("scroll", () => {
+  codeLineNumbers.scrollTop = codeInput.scrollTop;
+});
+
+// --- Expand/collapse: blow one pane up to fill the whole main area ---
+const EXPAND_BUTTONS = { lesson: lessonExpandBtn, editor: editorExpandBtn, output: outputExpandBtn };
+
+function setExpandedPane(which) {
+  Object.entries(EXPAND_BUTTONS).forEach(([name, btn]) => {
+    lessonGrid.classList.remove(`expanded-${name}`);
+    btn.setAttribute("aria-pressed", "false");
+    btn.title = "Expand this section";
+  });
+  if (which) {
+    lessonGrid.classList.add(`expanded-${which}`);
+    EXPAND_BUTTONS[which].setAttribute("aria-pressed", "true");
+    EXPAND_BUTTONS[which].title = "Collapse back to normal view";
+  }
+}
+
+Object.entries(EXPAND_BUTTONS).forEach(([name, btn]) => {
+  btn.addEventListener("click", () => {
+    setExpandedPane(lessonGrid.classList.contains(`expanded-${name}`) ? null : name);
+  });
+});
+
 codeInput.addEventListener("input", scheduleSaveCode);
+codeInput.addEventListener("input", updateLineNumbers);
 // Covers a browser refresh/tab-close, or the OS killing a backgrounded tab —
 // cases with no button click to hang a flushSaveCode() call off of. Not
 // airtight (the request can be cut off mid-flight if the page closes fast
