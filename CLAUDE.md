@@ -72,7 +72,7 @@ Reference material: include a simple, always-accessible cheat sheet / glossary (
 
 ### Known low-stakes gotcha
 
-Free Supabase projects auto-pause after 7 days with no database activity. Not a bug — just means if the app isn't opened for a week+, the first load afterward will fail until James manually resumes the project from the Supabase dashboard.
+Free Supabase projects auto-pause after 7 days with no database activity. Not a bug — just means if the app isn't opened for a week+, the first load afterward will fail until James manually resumes the project from the Supabase dashboard. Mitigated (2026-08-25) by a scheduled GitHub Action, `.github/workflows/keep-supabase-alive.yml`, that pings the database twice a week (Mon/Thu) so this shouldn't actually trigger anymore.
 
 ## Naming note
 

@@ -20,5 +20,5 @@ The original spark: James's sons were partway through a paid coding-education si
 - **Firebase instead of Supabase** — not seriously explored; James already operates Supabase for another project (Forge Anchor) and knows the tooling, so reusing that expertise (in a fully separate project/org) was the lower-friction choice.
 
 ## Consequences
-- Free Supabase projects auto-pause after 7 days of no database activity. Not a bug — if the app goes unopened for a week+, the first load afterward will fail until James manually resumes the project from the Supabase dashboard. Documented here so it isn't mistaken for a real outage later.
+- Free Supabase projects auto-pause after 7 days of no database activity. Not a bug — if the app goes unopened for a week+, the first load afterward will fail until James manually resumes the project from the Supabase dashboard. Documented here so it isn't mistaken for a real outage later. Mitigated by a scheduled GitHub Action ([.github/workflows/keep-supabase-alive.yml](../../.github/workflows/keep-supabase-alive.yml)) that pings the database twice a week, so this shouldn't come up in practice anymore.
 - Every future dependency/tool choice for this project should be checked against the $0 constraint before adoption.
