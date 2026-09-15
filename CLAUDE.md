@@ -72,7 +72,7 @@ Reference material: include a simple, always-accessible cheat sheet / glossary (
 
 ### Known low-stakes gotcha
 
-Free Supabase projects auto-pause after 7 days with no database activity. Not a bug — just means if the app isn't opened for a week+, the first load afterward will fail until James manually resumes the project from the Supabase dashboard. Mitigated (2026-08-25) by a scheduled GitHub Action, `.github/workflows/keep-supabase-alive.yml`, that pings the database twice a week (Mon/Thu) so this shouldn't actually trigger anymore.
+Free Supabase projects auto-pause after 7 days with no database activity. Not a bug — just means if the app isn't opened for a week+, the first load afterward will fail until James manually resumes the project from the Supabase dashboard. Mitigated by a scheduled GitHub Action, `.github/workflows/keep-supabase-alive.yml`, that runs twice a week (Mon/Thu). Originally (2026-08-25) this did an anon-key read, which turned out not to count against Supabase's auto-pause activity metric despite running cleanly every time — a warning email arrived anyway. Fixed (2026-09-14) by switching to a real write: a dedicated `code_school.keepalive` table (RLS enabled, zero policies, explicit `GRANT` to `service_role` — see [migration](supabase/migrations/20260914000000_create_keepalive_table.sql)) that the workflow upserts into using a `SUPABASE_SERVICE_ROLE_KEY` repo secret. Same fix was applied on Reverie Revival first; see that project if this pattern needs repeating elsewhere.
 
 ## Naming note
 
