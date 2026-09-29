@@ -7,9 +7,15 @@ name: Keep Supabase alive
 # Reverie Revival project. This does a real write instead, via the
 # service_role key, to a dedicated code_school.keepalive table that no
 # client-side code can ever touch (RLS enabled, zero policies).
+#
+# Twice-a-week (Mon/Thu) still wasn't enough -- got an "insufficient
+# activity" warning on 2026-09-29 despite every write succeeding with no
+# gap over 4 days. Reverie Revival's equivalent job runs daily and hasn't
+# had this problem, so Supabase's threshold apparently isn't just "time
+# since last write" -- switched to daily to match.
 on:
   schedule:
-    - cron: "0 13 * * 1,4" # Monday and Thursday, 13:00 UTC
+    - cron: "0 13 * * *" # Daily, 13:00 UTC
   workflow_dispatch:
 
 jobs:

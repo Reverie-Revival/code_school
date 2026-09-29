@@ -72,7 +72,12 @@ Reference material: include a simple, always-accessible cheat sheet / glossary (
 
 ### Known low-stakes gotcha
 
-Free Supabase projects auto-pause after 7 days with no database activity. Not a bug — just means if the app isn't opened for a week+, the first load afterward will fail until James manually resumes the project from the Supabase dashboard. Mitigated by a scheduled GitHub Action, `.github/workflows/keep-supabase-alive.yml`, that runs twice a week (Mon/Thu). Originally (2026-08-25) this did an anon-key read, which turned out not to count against Supabase's auto-pause activity metric despite running cleanly every time — a warning email arrived anyway. Fixed (2026-09-14) by switching to a real write: a dedicated `code_school.keepalive` table (RLS enabled, zero policies, explicit `GRANT` to `service_role` — see [migration](supabase/migrations/20260914000000_create_keepalive_table.sql)) that the workflow upserts into using a `SUPABASE_SERVICE_ROLE_KEY` repo secret. Same fix was applied on Reverie Revival first; see that project if this pattern needs repeating elsewhere.
+Free Supabase projects auto-pause after 7 days with no database activity. Not a bug — just means if the app isn't opened for a week+, the first load afterward will fail until James manually resumes the project from the Supabase dashboard. Mitigated by a scheduled GitHub Action, `.github/workflows/keep-supabase-alive.yml`. History, in order of what didn't work:
+- Originally (2026-08-25) did an anon-key read twice a week. Turned out not to count against Supabase's auto-pause activity metric despite running cleanly every time — a warning email arrived anyway.
+- Switched (2026-09-14) to a real write, still twice a week: a dedicated `code_school.keepalive` table (RLS enabled, zero policies, explicit `GRANT` to `service_role` — see [migration](supabase/migrations/20260914000000_create_keepalive_table.sql)) that the workflow upserts into using a `SUPABASE_SERVICE_ROLE_KEY` repo secret. Every write verifiably succeeded (confirmed by reading the row back), yet another "insufficient activity" warning arrived on 2026-09-29 anyway.
+- Switched (2026-09-29) the cadence from twice-a-week to **daily**, matching Reverie Revival's equivalent job (which runs daily and has not had this problem). Apparently Supabase's threshold isn't simply "time since last write" — twice-a-week left gaps under 4 days and still wasn't enough.
+
+If this recurs even with a daily write, the next thing to try is a real Postgres wire connection (e.g. `psql` against the connection string) instead of a PostgREST API call, since both the read and write attempts so far went through the same REST API gateway.
 
 ## Naming note
 
