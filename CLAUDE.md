@@ -77,7 +77,9 @@ Free Supabase projects auto-pause after 7 days with no database activity. Not a 
 - Switched (2026-09-14) to a real write, still twice a week: a dedicated `code_school.keepalive` table (RLS enabled, zero policies, explicit `GRANT` to `service_role` — see [migration](supabase/migrations/20260914000000_create_keepalive_table.sql)) that the workflow upserts into using a `SUPABASE_SERVICE_ROLE_KEY` repo secret. Every write verifiably succeeded (confirmed by reading the row back), yet another "insufficient activity" warning arrived on 2026-09-29 anyway.
 - Switched (2026-09-29) the cadence from twice-a-week to **daily**, matching Reverie Revival's equivalent job (which runs daily and has not had this problem). Apparently Supabase's threshold isn't simply "time since last write" — twice-a-week left gaps under 4 days and still wasn't enough.
 
-If this recurs even with a daily write, the next thing to try is a real Postgres wire connection (e.g. `psql` against the connection string) instead of a PostgREST API call, since both the read and write attempts so far went through the same REST API gateway.
+- Switched (2026-10-12) to a real Postgres wire connection: the workflow now runs `psql` directly against the connection string (transaction pooler, port 6543 — the direct-connection host is IPv6-only and GitHub Actions runners can't reach it), bypassing PostgREST entirely. Needs the `SUPABASE_DB_URL` repo secret (full URI with password, from Settings → Database → Connection string → Transaction pooler tab). This is a fundamentally different channel than every previous attempt, all of which went through the REST API regardless of key or cadence.
+
+If this recurs even with a genuine wire-level write, something more fundamental is going on and worth asking Supabase support directly rather than continuing to guess.
 
 ## Naming note
 
