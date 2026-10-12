@@ -23,6 +23,12 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
+      - name: TEMP debug -- check secret shape (no secret value printed)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          echo "length: ${#SUPABASE_DB_URL}"
+          echo "starts with postgres: $(echo "$SUPABASE_DB_URL" | grep -c '^postgres')"
       - name: Write keepalive row via direct Postgres connection
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
