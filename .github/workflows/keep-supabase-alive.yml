@@ -1,18 +1,19 @@
 name: Keep Supabase alive
 
 # family_hub is a free-tier Supabase project, which auto-pauses after 7 days
-# with no database activity (see CLAUDE.md). A read-only SELECT (even one
-# that succeeds daily with HTTP 200) turned out NOT to count against
-# Supabase's auto-pause activity metric -- learned the hard way on the
-# Reverie Revival project. This does a real write instead, via the
-# service_role key, to a dedicated code_school.keepalive table that no
-# client-side code can ever touch (RLS enabled, zero policies).
-#
-# Twice-a-week (Mon/Thu) still wasn't enough -- got an "insufficient
-# activity" warning on 2026-09-29 despite every write succeeding with no
-# gap over 4 days. Reverie Revival's equivalent job runs daily and hasn't
-# had this problem, so Supabase's threshold apparently isn't just "time
-# since last write" -- switched to daily to match.
+# with no database activity (see CLAUDE.md). History, in order of what
+# didn't work:
+#   - anon-key read, twice a week (2026-08-25): warning arrived anyway.
+#   - service_role write via PostgREST, twice a week (2026-09-14): warning
+#     arrived anyway (2026-09-29), despite every write verifiably landing.
+#   - same service_role write, switched to daily (2026-09-29): warning
+#     arrived again (2026-10-12), with 12 straight daily writes verified
+#     successful and zero gaps.
+# Every attempt so far went through Supabase's REST API (PostgREST), just
+# with different keys/cadence. Switching to a direct Postgres wire
+# connection (psql) instead -- a fundamentally different channel that
+# can't be filtered by whatever PostgREST-layer nuance (key role, RLS,
+# schema cache) has been silently discarding the REST-based pings.
 on:
   schedule:
     - cron: "0 13 * * *" # Daily, 13:00 UTC
@@ -22,17 +23,11 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Write keepalive row in family_hub Supabase project
+      - name: Write keepalive row via direct Postgres connection
         env:
-          SUPABASE_URL: https://dpwbqfrwmlvqkfkcvfuy.supabase.co
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          curl -sf \
-            -X POST \
-            "$SUPABASE_URL/rest/v1/keepalive" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Content-Profile: code_school" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: resolution=merge-duplicates" \
-            -d '{"id": 1, "pinged_at": "'"$(date -u +%FT%TZ)"'"}'
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c \
+            "insert into code_school.keepalive (id, pinged_at) values (1, now())
+             on conflict (id) do update set pinged_at = excluded.pinged_at;"
